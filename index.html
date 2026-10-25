@@ -729,7 +729,7 @@ footer {
         x: px, y: py, rx: rad * (1 + rand() * 0.35), ry: rad, rot: rand() * Math.PI, debris,
         a: debris ? 0.32 : 0.55 + rand() * 0.3,
         p1: rand() * Math.PI * 2, p2: rand() * Math.PI * 2,
-        w1: (Math.PI * 2) / (6 + rand() * 8), w2: (Math.PI * 2) / (6 + rand() * 8)
+        w1: (Math.PI * 2) / (3.5 + rand() * 5), w2: (Math.PI * 2) / (3.5 + rand() * 5)
       });
       placed++;
     }
@@ -737,7 +737,7 @@ footer {
   function drawSection(t) {
     const n = secN, c = secCtx;
     if (!c) return;
-    const cx = n / 2, cy = n / 2, R = n * 0.36, amp = n * 0.0035;
+    const cx = n / 2, cy = n / 2, R = n * 0.36, amp = n * 0.009;
     c.fillStyle = tokens.secBg;
     c.fillRect(0, 0, n, n);
     c.fillStyle = tokens.secMatrix;
@@ -757,7 +757,7 @@ footer {
       const alpha = q.debris ? q.a : fluor ? q.a : q.a + 0.15;
       c.fillStyle = `rgba(${nr},${ng},${nb},${alpha.toFixed(3)})`;
       c.beginPath();
-      c.ellipse(q.x + dx, q.y + dy, q.rx, q.ry, q.rot, 0, Math.PI * 2);
+      c.ellipse(q.x + dx, q.y + dy, q.rx, q.ry, q.rot + 0.35 * Math.sin(q.w2 * t + q.p1), 0, Math.PI * 2);
       c.fill();
     }
     c.globalCompositeOperation = 'source-over';
