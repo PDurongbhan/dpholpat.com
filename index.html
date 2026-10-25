@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pholpat Durongbhan</title>
+<meta name="description" content="Pholpat (Big) Durongbhan, JSPS Postdoctoral Fellow at Kyushu University. I build validated imaging and machine-learning pipelines that recover gold-standard readouts from data any laboratory can acquire.">
+<link rel="canonical" href="https://dpholpat.com/">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Pholpat Durongbhan">
+<meta property="og:description" content="Validated imaging and machine-learning pipelines that recover gold-standard readouts from data any laboratory can acquire.">
+<meta property="og:url" content="https://dpholpat.com/">
+<meta property="og:image" content="https://dpholpat.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pholpat Durongbhan. A cell aggregate drawn half as a brightfield image and half as a stained section.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dpholpat.com/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..650;1,8..60,400&amp;display=swap">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Pholpat Durongbhan",
+  "jobTitle": "JSPS Postdoctoral Fellow",
+  "affiliation": [
+    { "@type": "CollegeOrUniversity", "name": "Kyushu University" },
+    { "@type": "CollegeOrUniversity", "name": "The University of Melbourne" }
+  ],
+  "alumniOf": [
+    { "@type": "CollegeOrUniversity", "name": "The University of Melbourne" },
+    { "@type": "CollegeOrUniversity", "name": "Cranfield University" },
+    { "@type": "CollegeOrUniversity", "name": "Chulalongkorn University" }
+  ],
+  "url": "https://dpholpat.com/",
+  "sameAs": [
+    "https://orcid.org/0000-0002-5164-3482",
+    "https://scholar.google.com.au/citations?user=owSd8f0AAAAJ",
+    "https://www.linkedin.com/in/pholpatd/",
+    "https://github.com/PDurongbhan",
+    "https://researchmap.jp/pdurongbhan",
+    "https://www.researchgate.net/profile/Pholpat-Durongbhan"
+  ]
+}
+</script>
+<style>
+/* Layout: a specimen sheet. Name, thesis and links on the left with Fig. 1 (routine image vs gold standard) on the right; below, one reading column of year-keyed lists beside section names. */
+:root {
+  /* Palette from an H&E slide: glass, hematoxylin, eosin */
+  --slide: #F4F5F9;
+  --ink: #1D1F45;
+  --ink-2: #4A4C6E;
+  --hema: #3A3F9E;
+  --eosin: #B8325E;
+  --line: #D9DBE7;
+  --select: #E9C3D2;
+  /* Fig. 1: brightfield greys, stained section */
+  --bf-dark: #3E4152;
+  --bf-light: #E4E6EC;
+  --sec-bg: #F6EDF1;
+  --sec-matrix: #E3A9BE;
+  --sec-core: #F2D9E3;
+  --sec-nuc: #3B3A8F;
+  --sec-edge: #B9718F;
+  --sec-mode: stain;
+  --fig-handle: #F4F5F9;
+  --scale-bg: rgba(244, 245, 249, 0.86);
+  /* Type */
+  --font-display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-text: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-ja: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --slide: #121427;
+    --ink: #E7E8F4;
+    --ink-2: #A9ABC8;
+    --hema: #9EA3FF;
+    --eosin: #F08DAE;
+    --line: #2A2D4A;
+    --select: #3A2C55;
+    --bf-dark: #2A2C3A;
+    --bf-light: #A9ACB8;
+    --sec-bg: #090A16;
+    --sec-matrix: #2A1631;
+    --sec-core: #160F22;
+    --sec-nuc: #6F8BFF;
+    --sec-edge: #5B3A6E;
+    --sec-mode: fluor;
+    --fig-handle: #121427;
+    --scale-bg: rgba(18, 20, 39, 0.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --slide: #121427;
+  --ink: #E7E8F4;
+  --ink-2: #A9ABC8;
+  --hema: #9EA3FF;
+  --eosin: #F08DAE;
+  --line: #2A2D4A;
+  --select: #3A2C55;
+  --bf-dark: #2A2C3A;
+  --bf-light: #A9ACB8;
+  --sec-bg: #090A16;
+  --sec-matrix: #2A1631;
+  --sec-core: #160F22;
+  --sec-nuc: #6F8BFF;
+  --sec-edge: #5B3A6E;
+  --sec-mode: fluor;
+  --fig-handle: #121427;
+  --scale-bg: rgba(18, 20, 39, 0.8);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--slide);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--select); color: var(--ink); }
+a { color: var(--hema); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { text-decoration-color: var(--eosin); }
+:focus-visible { outline: 2px solid var(--hema); outline-offset: 3px; border-radius: 2px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.wrap {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.inner { max-width: 70rem; margin-inline: auto; padding-inline: clamp(0px, 3vw, 2rem); }
+
+/* Section menu */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+.toc {
+  display: flex; flex-wrap: wrap; gap: 0 1.25rem;
+  padding-block: 0.75rem 0;
+  font-family: var(--font-display); font-size: 0.875rem; font-weight: 500;
+}
+.toc a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-2); text-decoration: none; }
+.toc a:hover { color: var(--ink); text-decoration: underline; text-decoration-color: var(--eosin); }
+.block { scroll-margin-top: 1rem; }
+
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: start;
+  padding-block: clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
+}
+.who { display: grid; gap: 1.5rem; min-width: 0; }
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 760;
+  font-size: clamp(2.5rem, 1.4rem + 4.6vw, 4.75rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.kana { margin: 0.75rem 0 0; font-family: var(--font-ja); font-size: 0.9375rem; letter-spacing: 0.12em; color: var(--ink-2); }
+.role { margin: 0; font-family: var(--font-display); font-size: 1.0625rem; line-height: 1.45; }
+.role strong { display: block; font-weight: 650; color: var(--ink); }
+.role span { display: block; color: var(--ink-2); }
+.thesis {
+  margin: 0;
+  max-width: 32em;
+  font-size: clamp(1.1875rem, 1.05rem + 0.5vw, 1.4375rem);
+  line-height: 1.5;
+}
+.links {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0 1.25rem;
+  font-family: var(--font-display); font-weight: 600; font-size: 0.9375rem;
+}
+.links a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Fig. 1 */
+.fig { margin: 0; display: grid; gap: 0.5rem; min-width: 0; }
+.fig-labels {
+  display: flex; justify-content: space-between; gap: 1rem;
+  font-family: var(--font-display); font-size: 0.8125rem; font-weight: 600; color: var(--ink-2);
+}
+.fig-frame {
+  aspect-ratio: 1 / 1; max-width: 100%;
+  border: 1px solid var(--line); border-radius: 4px; overflow: hidden;
+  background: var(--sec-bg);
+}
+.fig-frame canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: ew-resize; }
+.fig input[type="range"] { display: block; width: 100%; height: 44px; margin: 0; accent-color: var(--hema); background: transparent; }
+.fig-lines { max-width: none; }
+#lines { min-width: 0; }
+#lines svg { display: block; width: 100%; height: auto; }
+#contact { position: relative; }
+#contact > .body { position: relative; z-index: 1; }
+.net-wrap { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+#net, #net canvas { display: block; width: 100%; height: 100%; }
+footer { display: grid; gap: 0.5rem; }
+footer p { margin: 0; max-width: 46rem; }
+.fig figcaption {
+  font-size: 0.875rem; line-height: 1.5; color: var(--ink-2);
+  text-align: justify; hyphens: auto;
+}
+.fig figcaption b { font-family: var(--font-display); color: var(--ink); }
+
+/* Sections */
+.block {
+  --col-gap: clamp(1.5rem, 4vw, 4rem);
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: 1rem var(--col-gap);
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+  border-top: 1px solid var(--line);
+}
+.block > h2 {
+  margin: 0;
+  font-family: var(--font-display); font-stretch: 112%;
+  font-size: 1.375rem; font-weight: 680; line-height: 1.3;
+}
+.body { display: grid; gap: 1.5rem; min-width: 0; max-width: 46rem; }
+.block > .body { grid-column: 2; }
+.block > .fig-lines { grid-column: 1 / -1; margin-block: 0.75rem 0.5rem; }
+.body > p { margin: 0; max-width: 40em; }
+.note { font-family: var(--font-display); font-size: 0.875rem; line-height: 1.5; color: var(--ink-2); }
+
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; }
+.rows > li { display: grid; grid-template-columns: 6.25rem minmax(0, 1fr); gap: 0 1.25rem; }
+.rows > li > div { min-width: 0; }
+.when {
+  font-family: var(--font-display); font-variant-numeric: tabular-nums;
+  font-size: 0.875rem; font-weight: 600; line-height: 1.75; color: var(--ink-2);
+}
+.when.live { color: var(--eosin); }
+.trajectory .when { font-size: 1rem; line-height: 1.6; }
+.rows h3, .rows h4 {
+  margin: 0;
+  font-family: var(--font-display); font-size: 1.0625rem; font-weight: 650; line-height: 1.4;
+  text-wrap: balance;
+}
+.group { display: grid; gap: 1rem; min-width: 0; }
+.group ~ .group { margin-top: 1rem; }
+.group-title {
+  margin: 0;
+  font-family: var(--font-display); font-stretch: 112%;
+  font-size: 1.125rem; font-weight: 700; line-height: 1.3; color: var(--ink);
+}
+.place { margin: 0.125rem 0 0; font-family: var(--font-display); font-size: 0.875rem; line-height: 1.5; color: var(--ink-2); }
+.rows p.desc { margin: 0.4rem 0 0; }
+.ja { display: block; margin-top: 0.125rem; font-family: var(--font-ja); font-size: 0.8125rem; color: var(--ink-2); }
+
+.cite { margin: 0; font-size: 1rem; line-height: 1.55; }
+.cite .t { font-weight: 600; color: var(--ink); text-decoration-color: var(--line); }
+.cite .t:hover { text-decoration-color: var(--eosin); }
+.cite .me { font-weight: 650; }
+.doi { display: block; margin-top: 0.2rem; font-family: var(--font-display); font-size: 0.8125rem; color: var(--ink-2); overflow-wrap: anywhere; }
+
+/* Contact */
+.email-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+.email {
+  font-family: var(--font-display); font-stretch: 112%; font-weight: 650;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.75rem); overflow-wrap: anywhere;
+}
+.copy {
+  min-height: 44px; padding: 0 1rem;
+  font: 600 0.875rem/1 var(--font-display); color: var(--ink);
+  background: transparent; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+}
+.copy:hover { border-color: var(--ink-2); }
+.status { font-family: var(--font-display); font-size: 0.875rem; color: var(--ink-2); }
+
+footer {
+  border-top: 1px solid var(--line);
+  padding-block: 1.5rem 3rem;
+  font-family: var(--font-display); font-size: 0.8125rem; color: var(--ink-2);
+}
+
+@media (max-width: 52rem) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .fig { max-width: 30rem; }
+  .block { grid-template-columns: minmax(0, 1fr); }
+  .block > .body { grid-column: 1; }
+}
+@media (max-width: 34rem) {
+  .rows > li { grid-template-columns: minmax(0, 1fr); }
+  .when, .trajectory .when { line-height: 1.4; margin-bottom: 0.2rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="inner">
+
+<nav class="toc" aria-label="On this page">
+  <a href="#research">Research</a>
+  <a href="#funding">Funding</a>
+  <a href="#publications">Publications</a>
+  <a href="#talks">Talks</a>
+  <a href="#awards">Awards</a>
+  <a href="#service">Service</a>
+  <a href="#background">Background</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<header class="hero">
+  <div class="who">
+    <div>
+      <h1 class="name">Pholpat Durongbhan</h1>
+      <p class="kana" lang="ja">ドゥロンバン ポルパット</p>
+    </div>
+    <p class="role"><strong>JSPS Postdoctoral Fellow, Kyushu University</strong><span>Biothermal Engineering Laboratory, Fukuoka, Japan.</span><span>Also affiliated with the University of Melbourne.</span><span>Everyone calls me Big.</span></p>
+    <p class="thesis">I make scarce, destructive, or equipment-bound measurements accessible. I build validated imaging and machine-learning pipelines that recover gold-standard readouts from data any laboratory can acquire, and I hold each surrogate to the standard it replaces.</p>
+    <ul class="links" aria-label="Contact and profiles">
+      <li><a href="#contact">Email</a></li>
+      <li><a href="https://www.dropbox.com/scl/fi/erno4ocvmw9lyqjrreou9/DPholpat_WebCV.pdf?rlkey=srcbr86rx75jzb7bf3vrpu8n7&amp;dl=1">CV (PDF)</a></li>
+      <li><a href="https://scholar.google.com.au/citations?user=owSd8f0AAAAJ&amp;hl=en">Google Scholar</a></li>
+      <li><a href="https://orcid.org/0000-0002-5164-3482">ORCID</a></li>
+      <li><a href="https://github.com/PDurongbhan">GitHub</a></li>
+      <li><a href="https://www.linkedin.com/in/pholpatd/">LinkedIn</a></li>
+      <li><a href="https://researchmap.jp/pdurongbhan">researchmap</a></li>
+      <li><a href="https://www.researchgate.net/profile/Pholpat-Durongbhan">ResearchGate</a></li>
+    </ul>
+  </div>
+
+  <figure class="fig">
+    <div class="fig-labels" aria-hidden="true"><span>Routine image</span><span>Gold standard</span></div>
+    <div class="fig-frame">
+      <canvas id="aggregate" width="600" height="600" role="img" aria-label="Schematic of a cell aggregate about 500 micrometres across. Left of the divider is a routine brightfield image; right of the divider is the stained section it stands in for. A scale bar marks 100 micrometres."></canvas>
+    </div>
+    <label class="sr-only" for="split">Divider between routine image and gold standard</label>
+    <input type="range" id="split" min="0" max="100" value="50">
+    <figcaption><b>Fig. 1.</b> A cell aggregate about 500&nbsp;µm across, drawn as a routine brightfield image (left) and as the stained section it stands in for (right). My pipelines aim to read the right from the left without cutting anything. Drag the divider to compare. Schematic, not data.</figcaption>
+  </figure>
+</header>
+
+<main>
+<section class="block" id="research" aria-labelledby="h-research">
+  <h2 id="h-research">Research</h2>
+  <div class="body">
+    <p>The same move has worked across systems: brain function from EEG, then musculoskeletal structure and composition from high-resolution computed tomography, and now three-dimensional cell aggregates, whose mechanical and functional state I recover from routine imaging. The forward programme targets the hardest case, where the ground truth is itself too scarce to measure. Reproducibility runs through all of it: measurements designed to be adopted, replicated and extended by other groups.</p>
+    <p class="note">Three lines of work, in the order I took them up. All of them are still running.</p>
+  </div>
+    <figure class="fig fig-lines">
+      <div id="lines" role="img" aria-label="Timeline of the three lines of work"></div>
+      <figcaption><b>Fig. 2.</b> The three lines and the papers on each, taken from the publication list. Filled marks are first- or corresponding-author papers. The lines are drawn to today's date; the dashed ends mean the work continues.</figcaption>
+    </figure>
+  <div class="body">
+    <ol class="rows trajectory">
+      <li>
+        <span class="when live">2017–</span>
+        <div>
+          <h3>Brain activity and language</h3>
+          <p class="place">Cranfield University, United Kingdom</p>
+          <p class="desc">Machine-learning frameworks for diagnosing dementia from EEG, using frequency, time-frequency and connectivity features. The line continues through research projects with medical students in Australia. The latest paper, in the <i>Journal of Neuroscience Methods</i> (2026), shows that analysis choices alone can produce apparent rich-club differences. Thai linguistics sits on this line as well, so far as a book chapter on reported thought in Thai news reports, because the next EEG work is on language.</p>
+        </div>
+      </li>
+      <li>
+        <span class="when live">2019–</span>
+        <div>
+          <h3>Joints and mineralised tissue</h3>
+          <p class="place"><a href="https://biomedical.eng.unimelb.edu.au/integrative-cartilage">Integrative Cartilage Research Group</a> of Kathryn Stok, The University of Melbourne, Australia</p>
+          <p class="desc">Reproducible, high-throughput morphometry of bone, cartilage and the osteochondral interface from microCT, contrast-enhanced CT and synchrotron imaging, used to track coordinated tissue change in preclinical models of osteoarthritis. The collaboration with the University of Melbourne continues, with results from the postdoc still appearing, and I review CT imaging papers for journals and conferences.</p>
+        </div>
+      </li>
+      <li>
+        <span class="when live">2026–</span>
+        <div>
+          <h3>Cell aggregates and embryos</h3>
+          <p class="place"><a href="https://biomech-lab.com/">Cell Mechanics Group</a> of Jeonghyun Kim, in the <a href="https://www.mech.kyushu-u.ac.jp/~biotherm/">Biothermal Engineering Laboratory</a>, Kyushu University, Japan</p>
+          <p class="desc">Estimating the mechanical properties of embryos and 3D cell aggregates non-invasively, by pairing routine microscopy with quantitative image features, machine learning and experimental mechanics. This is the main programme now, supported by a JSPS Postdoctoral Fellowship.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="funding" aria-labelledby="h-funding">
+  <h2 id="h-funding">Funding</h2>
+  <div class="body">
+    <ol class="rows">
+      <li>
+        <span class="when">2026</span>
+        <div><h3>JSPS Postdoctoral Fellowship (Standard Program)</h3><p class="place">Japan Society for the Promotion of Science</p><p class="desc">Establishing image-driven estimation of embryonic mechanical properties for reproductive health. Hosted by A/Prof. Jeonghyun Kim at Kyushu University. About 7% success rate.</p></div>
+      </li>
+      <li>
+        <span class="when">2026</span>
+        <div><h3>Grant-in-Aid for JSPS Research Fellow</h3><p class="place">Japan Society for the Promotion of Science</p><p class="desc">Data-driven mechanical characterisation of early-stage embryos for reproductive medicine. Hosted by A/Prof. Jeonghyun Kim at Kyushu University.</p><span class="ja" lang="ja">生殖医療に向けた初期胚のデータ駆動型力学特性評価構築</span></div>
+      </li>
+      <li>
+        <span class="when">2026</span>
+        <div><h3>Research Grant (A)</h3><p class="place">Tateisi Science and Technology Foundation</p><p class="desc">Creation of an image analysis platform integrating morphology and mechanical properties of embryos. Co-investigator leading imaging and AI development, with A/Prof. Jeonghyun Kim as PI.</p><span class="ja" lang="ja">受精卵の形態と力学特性を統合した画像解析基盤の創成</span></div>
+      </li>
+      <li>
+        <span class="when">2025</span>
+        <div><h3>Two postdoctoral fellowships, offered and declined</h3><p class="place">University of Calgary</p><p class="desc">The VP (Research) Postdoctoral Match-Funding Fellowship and the T. Chen Fong Postdoctoral Fellowship in Medical Imaging Science.</p></div>
+      </li>
+      <li>
+        <span class="when">2024</span>
+        <div><h3>Early Career Researcher Grant</h3><p class="place">The University of Melbourne</p><p class="desc">Sole PI. High-throughput, high-resolution: a comprehensive image analysis platform for arthritis research.</p></div>
+      </li>
+      <li>
+        <span class="when">2024</span>
+        <div><h3>Accelerate Grant</h3><p class="place">The University of Melbourne</p><p class="desc">Sole PI. Quantifying microstructural changes with the synchrotron: a closer look into the bone-cartilage interface.</p></div>
+      </li>
+      <li>
+        <span class="when">2023</span>
+        <div><h3>Grant-in-Aid</h3><p class="place">Australian and New Zealand Bone and Mineral Society and Bone Health Foundation</p><p class="desc">Co-investigator for imaging, with K. S. Stok as PI.</p></div>
+      </li>
+      <li>
+        <span class="when">2023</span>
+        <div><h3>Synchrotron beamtime</h3><p class="place">Australia's Nuclear Science and Technology Organisation (ANSTO)</p><p class="desc">Co-investigator for image analysis, with K. S. Stok as PI.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="publications" aria-labelledby="h-publications">
+  <h2 id="h-publications">Publications</h2>
+  <div class="body">
+    <p class="note">Newest first. My name is in bold; an asterisk marks the corresponding author. Conference abstracts are listed in the <a href="https://www.dropbox.com/scl/fi/erno4ocvmw9lyqjrreou9/DPholpat_WebCV.pdf?rlkey=srcbr86rx75jzb7bf3vrpu8n7&amp;dl=1">CV</a>, and citation counts are on <a href="https://scholar.google.com.au/citations?user=owSd8f0AAAAJ&amp;hl=en">Google Scholar</a>.</p>
+    <div class="group">
+      <h3 class="group-title">Journal articles</h3>
+      <ol class="rows">
+        <li data-line="brain" data-lead="1"><span class="when">2026</span><div><p class="cite"><span class="au">K.-W. Liu, R. T. E. Pang, <span class="me">P. Durongbhan</span>*.</span> <a class="t" href="https://doi.org/10.1016/j.jneumeth.2026.110927">Analysis choices can produce apparent rich-club differences: an Alzheimer's disease EEG case study.</a> <i>Journal of Neuroscience Methods</i>.<span class="doi">DOI 10.1016/j.jneumeth.2026.110927</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2026</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, L. A. E. Evans, A. Sharma, A. A. Pitsillides, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.ostima.2026.100473">Mechanobiology of the osteochondral unit using advanced imaging in preclinical osteoarthritis models.</a> <i>Osteoarthritis Imaging</i>.<span class="doi">DOI 10.1016/j.ostima.2026.100473</span></p></div></li>
+        <li data-line="joints"><span class="when">2026</span><div><p class="cite"><span class="au">J. E. Schadow, <span class="me">P. Durongbhan</span>, H. Liu, R. A. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.bone.2026.118067">Development of an in vivo contrast-enhanced microcomputed tomography protocol for cartilage and bone imaging in mice with anionic contrast agent.</a> <i>Bone</i>.<span class="doi">DOI 10.1016/j.bone.2026.118067</span></p></div></li>
+        <li data-line="joints"><span class="when">2026</span><div><p class="cite"><span class="au">Y. Dilek, J. Q. Rios, C. O'Riordan, V. Bruggink, K. Warmink, K. A. Muenzebrock, H. Chen, M. Fenu, N. Bloemhoff, <span class="me">P. Durongbhan</span>, G. J. V. M. van Osch, K. S. Stok, J. P. Garcia, L. B. Creemers.</span> <a class="t" href="https://doi.org/10.1016/j.actbio.2026.07.050">Spatial and longitudinal monitoring of cartilage and intervertebral disc extracellular matrix formation using proteoglycan building blocks and click chemistry: specificity, quantification and detection upon subcutaneous implantation.</a> <i>Acta Biomaterialia</i>.<span class="doi">DOI 10.1016/j.actbio.2026.07.050</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2026</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, L. A. E. Evans, D. M. Findlay, A. A. Pitsillides, B. Willie, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.joca.2026.05.006">Improving comparability of microCT assessment and reporting of subchondral bone in mouse models of osteoarthritis.</a> <i>Osteoarthritis and Cartilage</i>.<span class="doi">DOI 10.1016/j.joca.2026.05.006</span></p></div></li>
+        <li data-line="joints"><span class="when">2026</span><div><p class="cite"><span class="au">H. Liu, <span class="me">P. Durongbhan</span>, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1093/jbmrpl/ziag087">Three-dimensional quantitative morphometric analysis (QMA) allows for reproducible and sensitive assessment of bone and joint in a preclinical mouse model of osteoarthritis.</a> <i>JBMR Plus</i>.<span class="doi">DOI 10.1093/jbmrpl/ziag087</span></p></div></li>
+        <li data-line="joints"><span class="when">2026</span><div><p class="cite"><span class="au">S. Bonaretti, M. Barzegari, M. Bevers, and 41 others, including <span class="me">P. Durongbhan</span>.</span> <a class="t" href="https://doi.org/10.1093/jbmrpl/ziag025">Open and reproducible research in musculoskeletal imaging: why it matters and how to implement it with the guidelines of the ORMIR community.</a> <i>JBMR Plus</i>.<span class="doi">DOI 10.1093/jbmrpl/ziag025</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2024</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1109/TBME.2024.3431634">Empirical modelling workflow for resolution invariant assessment of osteophytes.</a> <i>IEEE Transactions on Biomedical Engineering</i>.<span class="doi">DOI 10.1109/TBME.2024.3431634</span></p></div></li>
+        <li data-line="joints"><span class="when">2024</span><div><p class="cite"><span class="au">M. T. Kuczynski, N. J. Neeteson, K. S. Stok, A. J. Burghardt, M. A. Espinosa Hernandez, J. Vicory, J. J. Tse, <span class="me">P. Durongbhan</span>, S. Bonaretti, A. K. O. Wong, S. K. Boyd, S. L. Manske.</span> <a class="t" href="https://doi.org/10.21105/joss.06084">ORMIR_XCT: a Python package for high resolution peripheral quantitative computed tomography image processing.</a> <i>Journal of Open Source Software</i>.<span class="doi">DOI 10.21105/joss.06084</span></p></div></li>
+        <li data-line="joints"><span class="when">2023</span><div><p class="cite"><span class="au">H. Liu, <span class="me">P. Durongbhan</span>, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1007/s11914-023-00795-6">Image registration in longitudinal bone assessment using computed tomography.</a> <i>Current Osteoporosis Reports</i>.<span class="doi">DOI 10.1007/s11914-023-00795-6</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2023</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, J. W. MacKay, J. E. Schadow, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.ostima.2023.100088">Quantitative morphometric analysis in tibiofemoral joint osteoarthritis imaging: a literature review.</a> <i>Osteoarthritis Imaging</i>.<span class="doi">DOI 10.1016/j.ostima.2023.100088</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2023</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, M. O. Silva, Z. Li, N. Ansari, R. Y. N. Kour, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.bone.2022.116606">A microCT imaging protocol for reproducible and efficient quantitative morphometric analysis (QMA) of joint structures for in situ mouse tibio-femoral joint.</a> <i>Bone</i>.<span class="doi">DOI 10.1016/j.bone.2022.116606</span></p></div></li>
+        <li data-line="joints" data-lead="1"><span class="when">2022</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, C. E. Davey, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1038/s41598-021-04542-8">SPHARM-PDM based image preprocessing pipeline for quantitative morphometric analysis (QMA) for in situ joint assessment in rabbit and rat models.</a> <i>Scientific Reports</i>.<span class="doi">DOI 10.1038/s41598-021-04542-8</span></p></div></li>
+        <li data-line="joints"><span class="when">2021</span><div><p class="cite"><span class="au">B. A. Besler, J. E. Schadow, <span class="me">P. Durongbhan</span>, T. H. Steiner, R. J. Choo, M. A. Zulliger, M. Wilke, K. Atal, C. Firminger, A. Quintin, B. Koller, R. Müller, D. Nesic, K. S. Stok.</span> <a class="t" href="https://doi.org/10.1016/j.bone.2021.115903">Quantitative measures of bone shape, cartilage morphometry and joint alignment are associated with disease in an ACLT and MMx rat model of osteoarthritis.</a> <i>Bone</i>.<span class="doi">DOI 10.1016/j.bone.2021.115903</span></p></div></li>
+        <li data-line="brain"><span class="when">2020</span><div><p class="cite"><span class="au">Y. Zhao, Y. Zhao, <span class="me">P. Durongbhan</span>, L. Chen, S. A. Billings, P. Zis, Z. C. Unwin, M. De Marco, A. Venneri, D. J. Blackburn, P. G. Sarrigiannis.</span> <a class="t" href="https://doi.org/10.1109/TMI.2019.2953584">Imaging of nonlinear and dynamic functional brain connectivity based on EEG recordings with the application on diagnosis of Alzheimer's disease.</a> <i>IEEE Transactions on Medical Imaging</i>.<span class="doi">DOI 10.1109/TMI.2019.2953584</span></p></div></li>
+        <li data-line="brain" data-lead="1"><span class="when">2019</span><div><p class="cite"><span class="au"><span class="me">P. Durongbhan</span>, Y. Zhao, L. Chen, P. Zis, M. De Marco, Z. C. Unwin, A. Venneri, X. He, S. Li, Y. Zhao, D. J. Blackburn, P. G. Sarrigiannis.</span> <a class="t" href="https://doi.org/10.1109/TNSRE.2019.2909100">A dementia classification framework using frequency and time-frequency features based on EEG signals.</a> <i>IEEE Transactions on Neural Systems and Rehabilitation Engineering</i>.<span class="doi">DOI 10.1109/TNSRE.2019.2909100</span></p></div></li>
+      </ol>
+    </div>
+    <div class="group">
+      <h3 class="group-title">Book chapters</h3>
+      <ol class="rows">
+        <li data-line="joints"><span class="when">2026</span><div><p class="cite"><span class="au">A. M. Cagnoni, H. Liu, <span class="me">P. Durongbhan</span>, K. S. Stok.</span> In vivo contrast-enhanced micro-computed tomography for whole-joint assessment in mouse models of osteoarthritis: image processing and quantitative analysis. In <i>Cartilage</i>, Springer.</p></div></li>
+        <li data-line="brain"><span class="when">2023</span><div><p class="cite"><span class="au">P. Tiratanti, <span class="me">P. Durongbhan</span>.</span> <a class="t" href="https://doi.org/10.1515/9783111065830-009">Reported thought embedded in reported speech in Thai news reports.</a> In <i>The Grammar of Thinking: From Reported Speech to Reported Thought in the Languages of the World</i>, De Gruyter Mouton.<span class="doi">DOI 10.1515/9783111065830-009</span></p></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="talks" aria-labelledby="h-talks">
+  <h2 id="h-talks">Recent talks</h2>
+  <div class="body">
+    <ol class="rows">
+      <li>
+        <span class="when">Sep 2026</span>
+        <div><h3>Towards 3D virtual histology of mineralised tissue</h3><span class="ja" lang="ja">石灰化組織の3Dバーチャル組織学に向けて</span><p class="place">61st Medical Engineering Collaboration Initiative, Fukuoka</p></div>
+      </li>
+      <li>
+        <span class="when">Sep 2026</span>
+        <div><h3>From stacks to stress: what imaging can and cannot tell you about 3D mechanics</h3><p class="place">Invited seminar, Soonchunhyang University, Cheonan, Korea</p></div>
+      </li>
+      <li>
+        <span class="when">Sep 2026</span>
+        <div><h3>Predicting the unseen: lessons from cross-modality imaging</h3><p class="place">KAIST–Kyushu University Joint Workshop, Daejeon, Korea</p></div>
+      </li>
+      <li>
+        <span class="when">Jun 2026</span>
+        <div><h3>Quantitative image analysis: how true is your image?</h3><span class="ja" lang="ja">定量的画像解析：その画像は、どこまで本当か？</span><p class="place">JSPS Fellow Seminar, Fukuoka</p></div>
+      </li>
+      <li>
+        <span class="when">Feb 2025</span>
+        <div><h3>Imaging the osteochondral unit: insights from the synchrotron</h3><p class="place">Nagoya–Melbourne Joint Research Workshops, Nagoya</p></div>
+      </li>
+      <li>
+        <span class="when">Dec 2024</span>
+        <div><h3>Imaging the osteochondral unit: insights from the synchrotron</h3><p class="place">Future Global Leaders in MSK Research, Melbourne</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="awards" aria-labelledby="h-awards">
+  <h2 id="h-awards">Awards</h2>
+  <div class="body">
+    <ol class="rows">
+      <li><span class="when">2025</span><div><h3>National Innovation Visa, Critical Technologies</h3><p class="place">Australian Government</p><p class="desc">Tier one sector, about 3% invitation rate.</p></div></li>
+      <li><span class="when">2023</span><div><h3>FEIT Excellence Award in Teaching and Learning</h3><p class="place">The University of Melbourne</p><p class="desc">For innovation in teaching programs.</p></div></li>
+      <li><span class="when">2023</span><div><h3>Christopher and Margie Nordin Young Investigator Poster Award, finalist</h3><p class="place">Australian and New Zealand Bone and Mineral Society</p></div></li>
+      <li><span class="when">2022</span><div><h3>Christine and T. Jack Martin Research Travel Grant</h3><p class="place">Australian and New Zealand Bone and Mineral Society</p></div></li>
+      <li><span class="when">2021</span><div><h3>Argus Research Scholarship in Engineering</h3><p class="place">The University of Melbourne</p></div></li>
+      <li><span class="when">2021</span><div><h3>W. E. and C. H. H. Cook Memorial Award</h3><p class="place">The University of Melbourne</p></div></li>
+      <li><span class="when">2019</span><div><h3>Melbourne Research Scholarship</h3><p class="place">The University of Melbourne and the Australian Research Council</p><p class="desc">Full PhD stipend with fee remission.</p></div></li>
+      <li><span class="when">2017</span><div><h3>Cranfield Scholarship</h3><p class="place">Cranfield University, Centre for Computational Engineering Sciences</p></div></li>
+      <li><span class="when">2015</span><div><h3>Dow Chemical Scholarship for Academic Excellence in Electrical Engineering</h3><p class="place">Dow Chemical Thailand Group</p></div></li>
+    </ol>
+    <p class="note">Conference travel grants from ANZBMS, ANZORS, QMSKI, ORMIR and the University of Melbourne (2022 to 2025) are listed in the CV.</p>
+  </div>
+</section>
+
+<section class="block" id="service" aria-labelledby="h-service">
+  <h2 id="h-service">Service</h2>
+  <div class="body">
+    <ol class="rows">
+      <li><span class="when live">2025–</span><div><h3>Lead, Research Advisory Committee</h3><p class="place">Australian Medical Student Research Association</p></div></li>
+      <li><span class="when live">2024–</span><div><h3>Technical Advisory Board</h3><p class="place">Open and Reproducible Musculoskeletal Imaging Research (ORMIR)</p></div></li>
+      <li><span class="when">2026</span><div><h3>Review Committee, BHI 2026</h3><p class="place">IEEE EMBS International Conference on Biomedical and Health Informatics</p></div></li>
+      <li><span class="when">2025–2026</span><div><h3>Editor-in-Chief, ANZBMS Newsletter</h3><p class="place">Australian and New Zealand Bone and Mineral Society</p></div></li>
+      <li><span class="when">2024–2025</span><div><h3>Technical Program Committee, ISBI</h3><p class="place">IEEE International Symposium on Biomedical Imaging</p></div></li>
+      <li><span class="when">2024</span><div><h3>Scientific Review Committee and session chair, QMSKI</h3><p class="place">International Workshop on Quantitative Musculoskeletal Imaging</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="background" aria-labelledby="h-background">
+  <h2 id="h-background">Background</h2>
+  <div class="body">
+    <div class="group">
+      <h3 class="group-title">Positions</h3>
+      <ol class="rows">
+        <li><span class="when live">2026–</span><div><h4>JSPS Postdoctoral Fellow</h4><p class="place"><a href="https://biomech-lab.com/">Cell Mechanics Group</a>, Kyushu University, Japan</p><p class="desc">Building a non-invasive, image-based platform to estimate the mechanical properties of embryos, pairing 3D confocal microscopy with quantitative feature extraction and machine-learning models.</p></div></li>
+        <li><span class="when live">2026–</span><div><h4>University Guest (Academic)</h4><p class="place"><a href="https://biomedical.eng.unimelb.edu.au/integrative-cartilage">Integrative Cartilage Research Group</a>, The University of Melbourne, Australia</p><p class="desc">Continuing the musculoskeletal imaging collaborations from Fukuoka.</p></div></li>
+        <li><span class="when">2023–2026</span><div><h4>Academic Specialist and Research Fellow</h4><p class="place"><a href="https://biomedical.eng.unimelb.edu.au/integrative-cartilage">Integrative Cartilage Research Group</a>, The University of Melbourne, Australia</p><p class="desc">Led a reproducible, high-throughput software framework for quantitative analysis of high-resolution 3D computed tomography.</p></div></li>
+        <li><span class="when">2018–2020</span><div><h4>Adjunct Researcher in Medical Imaging</h4><p class="place">Cranfield University, United Kingdom</p><p class="desc">EEG-based machine learning for dementia diagnosis.</p></div></li>
+      </ol>
+    </div>
+    <div class="group">
+      <h3 class="group-title">Education</h3>
+      <ol class="rows">
+        <li><span class="when">2019–2023</span><div><h4>PhD in Biomedical Engineering</h4><p class="place">The University of Melbourne, Australia</p><p class="desc">Thesis: <i>Development and validation of image processing framework for dynamic quantitative analyses of joint and osteochondral tissues</i>. Supervised by Prof. Kathryn Stok and A/Prof. Katie Davey.</p></div></li>
+        <li><span class="when">2017–2018</span><div><h4>MSc in Computational and Software Techniques in Engineering</h4><p class="place">Cranfield University, United Kingdom</p><p class="desc">Thesis: <i>Classification of dementia based on EEG data using advanced signal processing and machine learning approaches</i>. Supervised by Prof. Yifan Zhao.</p></div></li>
+        <li><span class="when">2012–2016</span><div><h4>BEng (Hons) in Electrical Engineering</h4><p class="place">Chulalongkorn University, Thailand</p><p class="desc">Thesis: <i>Image registration using feature point pairs</i>. Supervised by A/Prof. Charnchai Pluempitiwiriyawej.</p></div></li>
+      </ol>
+    </div>
+    <div class="group">
+      <h3 class="group-title">Teaching</h3>
+      <ol class="rows">
+        <li><span class="when">2024</span><div><h4>Co-lecturer, Circuits and Systems (BMEN30006)</h4><p class="place">The University of Melbourne, Australia</p><p class="desc">Taught the systems stream, covering signals, systems and mathematical modelling, to large biomedical engineering cohorts.</p></div></li>
+        <li><span class="when">2020–2023</span><div><h4>Workshop demonstrator, Circuits and Systems (BMEN30006)</h4><p class="place">The University of Melbourne, Australia</p><p class="desc">Hands-on workshops for several hundred students over four years, including the move to remote teaching during COVID-19.</p></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="contact" aria-labelledby="h-contact">
+  <h2 id="h-contact">Contact</h2>
+  <div class="body">
+    <p>Email is the best way to reach me.</p>
+    <div class="email-row">
+      <a class="email" id="email" href="#contact" data-user="p.durongbhan" data-host="kyudai.jp">p.durongbhan [at] kyudai.jp</a>
+      <button class="copy" type="button" id="copy">Copy address</button>
+      <span class="status" id="copy-status" role="status" aria-live="polite"></span>
+    </div>
+    <p class="note">Biothermal Engineering Laboratory, Department of Mechanical Engineering, Kyushu University, 744 Motooka, Nishi-ku, Fukuoka 819-0395, Japan</p>
+  </div>
+  <div class="net-wrap" aria-hidden="true"><div id="net"></div></div>
+</section>
+</main>
+
+<footer>
+  <p>The lines behind the contact details are my coauthors on the papers above, joined when we share a paper. If you would like to add one, my address is just above.</p>
+  <p>Updated October 2026.</p>
+</footer>
+
+</div>
+</div>
+
+<script>
+(() => {
+  /* Contact address, assembled here so it is not sitting in the page source for scrapers */
+  const email = document.getElementById('email');
+  const copy = document.getElementById('copy');
+  const status = document.getElementById('copy-status');
+  if (email) {
+    const address = email.dataset.user + '@' + email.dataset.host;
+    email.textContent = address;
+    email.href = 'mailto:' + address;
+    let timer = 0;
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(address);
+        status.textContent = 'Copied';
+      } catch (err) {
+        const range = document.createRange();
+        range.selectNodeContents(email);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        status.textContent = 'Selected. Press Ctrl+C or Cmd+C to copy.';
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => { status.textContent = ''; }, 3000);
+    });
+  }
+})();
+
+(() => {
+  /* Fig. 1: a schematic cell aggregate, brightfield on the left of the divider, stained section on the right */
+  const root = document.documentElement;
+  const canvas = document.getElementById('aggregate');
+  const slider = document.getElementById('split');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let imgA = null, imgB = null, built = '', tokens = {}, pending = 0;
+  let split = still ? 0.5 : 0.97;
+  let touched = false;
+
+  const rng = (seed) => () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const smooth = (e0, e1, x) => { let t = (x - e0) / (e1 - e0); t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t); };
+  const rgb = (hex) => {
+    let h = hex.replace('#', '').trim();
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const n = parseInt(h.slice(0, 6), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  /* The aggregate is not a perfect circle */
+  const shape = (th) => 1 + 0.028 * Math.sin(3 * th + 1.1) + 0.017 * Math.sin(5 * th + 0.4) + 0.009 * Math.sin(9 * th + 2.0);
+  const noise = (rand, n) => {
+    const w = n + 1, g = new Float32Array(w * w);
+    for (let i = 0; i < g.length; i++) g[i] = rand();
+    return (u, v) => {
+      const x = u * n, y = v * n;
+      const xi = Math.min(n - 1, x | 0), yi = Math.min(n - 1, y | 0);
+      const fx = x - xi, fy = y - yi;
+      const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      const a = g[yi * w + xi], b = g[yi * w + xi + 1], c = g[(yi + 1) * w + xi], d = g[(yi + 1) * w + xi + 1];
+      return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+    };
+  };
+
+  function readTokens() {
+    const cs = getComputedStyle(root);
+    const get = (name) => cs.getPropertyValue(name).trim();
+    tokens = {
+      bfDark: get('--bf-dark'), bfLight: get('--bf-light'),
+      secBg: get('--sec-bg'), secMatrix: get('--sec-matrix'), secCore: get('--sec-core'),
+      secNuc: get('--sec-nuc'), secEdge: get('--sec-edge'), mode: get('--sec-mode'),
+      ink: get('--ink'), handle: get('--fig-handle'), scaleBg: get('--scale-bg')
+    };
+  }
+
+  /* Brightfield: dark necrotic core, darker refractive rim, faint halo outside, grain */
+  function brightfield(n) {
+    const off = document.createElement('canvas');
+    off.width = off.height = n;
+    const c = off.getContext('2d');
+    const img = c.createImageData(n, n), d = img.data;
+    const lo = rgb(tokens.bfDark), hi = rgb(tokens.bfLight);
+    const rand = rng(7), coarse = noise(rand, 6), fine = noise(rand, 34);
+    const cx = n / 2, cy = n / 2, R = n * 0.36;
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const dx = x - cx, dy = y - cy;
+        const r = Math.sqrt(dx * dx + dy * dy) / (R * shape(Math.atan2(dy, dx)));
+        const u = x / n, v = y / n;
+        let t = 0.95 - 0.1 * ((dx * dx + dy * dy) / (n * n));
+        if (r < 1) {
+          t = 0.6 + 0.12 * (coarse(u, v) - 0.5) + 0.18 * (fine(u, v) - 0.5)
+            - 0.34 * smooth(0.62, 0, r) - 0.24 * smooth(0.84, 0.99, r);
+        } else {
+          t += 0.07 * Math.exp(-((r - 1.035) * (r - 1.035)) / 0.0008);
+        }
+        t += (rand() - 0.5) * 0.06;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const i = (y * n + x) * 4;
+        d[i] = lo[0] + (hi[0] - lo[0]) * t;
+        d[i + 1] = lo[1] + (hi[1] - lo[1]) * t;
+        d[i + 2] = lo[2] + (hi[2] - lo[2]) * t;
+        d[i + 3] = 255;
+      }
+    }
+    c.putImageData(img, 0, 0);
+    return off;
+  }
+
+  /* Stained section: matrix, pale necrotic core, nuclei dense in the proliferating rim and fragmented in the core.
+     In dark mode the same section is drawn as fluorescence. */
+  function section(n) {
+    const off = document.createElement('canvas');
+    off.width = off.height = n;
+    const c = off.getContext('2d');
+    const cx = n / 2, cy = n / 2, R = n * 0.36;
+    c.fillStyle = tokens.secBg;
+    c.fillRect(0, 0, n, n);
+    const path = new Path2D();
+    for (let k = 0; k <= 360; k++) {
+      const th = (k / 360) * Math.PI * 2, rr = R * shape(th);
+      const px = cx + rr * Math.cos(th), py = cy + rr * Math.sin(th);
+      if (k) path.lineTo(px, py); else path.moveTo(px, py);
+    }
+    path.closePath();
+    c.fillStyle = tokens.secMatrix;
+    c.fill(path);
+    const [cr, cg, cb] = rgb(tokens.secCore);
+    const core = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.6);
+    core.addColorStop(0, `rgba(${cr},${cg},${cb},1)`);
+    core.addColorStop(0.65, `rgba(${cr},${cg},${cb},0.9)`);
+    core.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+    c.fillStyle = core;
+    c.fill(path);
+    const [nr, ng, nb] = rgb(tokens.secNuc);
+    const fluor = tokens.mode === 'fluor';
+    if (fluor) c.globalCompositeOperation = 'lighter';
+    const rand = rng(11), rn = R * 0.019;
+    for (let placed = 0, tries = 0; placed < 900 && tries < 30000; tries++) {
+      const px = cx + (rand() * 2 - 1) * R * 1.06, py = cy + (rand() * 2 - 1) * R * 1.06;
+      const dx = px - cx, dy = py - cy;
+      const r = Math.sqrt(dx * dx + dy * dy) / (R * shape(Math.atan2(dy, dx)));
+      if (r > 0.965) continue;
+      const keep = r > 0.72 ? 1 : r > 0.45 ? 0.5 : 0.16;
+      if (rand() > keep) continue;
+      const debris = r < 0.45;
+      const rad = rn * (debris ? 0.4 + rand() * 0.3 : 0.8 + rand() * 0.45);
+      const alpha = debris ? 0.32 : fluor ? 0.55 + rand() * 0.3 : 0.7 + rand() * 0.25;
+      c.fillStyle = `rgba(${nr},${ng},${nb},${alpha.toFixed(3)})`;
+      c.beginPath();
+      c.ellipse(px, py, rad * (1 + rand() * 0.35), rad, rand() * Math.PI, 0, Math.PI * 2);
+      c.fill();
+      placed++;
+    }
+    c.globalCompositeOperation = 'source-over';
+    c.strokeStyle = tokens.secEdge;
+    c.lineWidth = Math.max(1, n * 0.003);
+    c.stroke(path);
+    return off;
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+  }
+
+  function draw() {
+    if (!imgA) return;
+    const n = canvas.width, x = Math.round(n * split), lw = Math.max(2, Math.round(n * 0.004));
+    ctx.clearRect(0, 0, n, n);
+    if (x > 0) ctx.drawImage(imgA, 0, 0, x, n, 0, 0, x, n);
+    if (x < n) ctx.drawImage(imgB, x, 0, n - x, n, x, 0, n - x, n);
+
+    /* Divider and handle */
+    ctx.fillStyle = tokens.ink;
+    ctx.fillRect(x - lw / 2, 0, lw, n);
+    const hr = n * 0.034, hy = n * 0.5, a = hr * 0.42;
+    ctx.beginPath();
+    ctx.arc(x, hy, hr, 0, Math.PI * 2);
+    ctx.fillStyle = tokens.handle;
+    ctx.fill();
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = tokens.ink;
+    ctx.stroke();
+    ctx.fillStyle = tokens.ink;
+    ctx.beginPath(); ctx.moveTo(x - a * 0.35, hy - a); ctx.lineTo(x - a * 1.25, hy); ctx.lineTo(x - a * 0.35, hy + a); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + a * 0.35, hy - a); ctx.lineTo(x + a * 1.25, hy); ctx.lineTo(x + a * 0.35, hy + a); ctx.closePath(); ctx.fill();
+
+    /* Scale bar: the aggregate is drawn 500 µm across (0.72 of the frame), so 100 µm is 0.144 of the frame */
+    const bw = n * 0.144, bh = Math.max(3, Math.round(n * 0.008));
+    const bx = n * 0.06, by = n * 0.925, fs = Math.round(n * 0.034), pad = n * 0.018;
+    const top = by - fs - pad * 1.6;
+    ctx.fillStyle = tokens.scaleBg;
+    roundRect(bx - pad, top, bw + pad * 2, by + bh + pad - top, n * 0.01);
+    ctx.fill();
+    ctx.fillStyle = tokens.ink;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.font = `600 ${fs}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('100 µm', bx, by - pad * 0.6);
+  }
+
+  /* Rebuild both images when the size or the theme changes */
+  function render(force) {
+    const css = canvas.clientWidth;
+    if (!css) return;
+    const n = Math.round(css * Math.min(2, window.devicePixelRatio || 1));
+    readTokens();
+    const key = n + '|' + tokens.secBg + '|' + tokens.bfLight;
+    if (!force && key === built) { draw(); return; }
+    built = key;
+    canvas.width = canvas.height = n;
+    imgA = brightfield(n);
+    imgB = section(n);
+    draw();
+  }
+  const schedule = () => { clearTimeout(pending); pending = setTimeout(() => render(false), 120); };
+
+  function setSplit(v) {
+    split = Math.min(1, Math.max(0, v));
+    slider.value = String(Math.round(split * 100));
+    draw();
+  }
+  slider.addEventListener('input', () => { touched = true; split = Number(slider.value) / 100; draw(); });
+  let dragging = false;
+  const fromPointer = (e) => { const b = canvas.getBoundingClientRect(); return (e.clientX - b.left) / b.width; };
+  canvas.addEventListener('pointerdown', (e) => { touched = true; dragging = true; canvas.setPointerCapture(e.pointerId); setSplit(fromPointer(e)); });
+  canvas.addEventListener('pointermove', (e) => { if (dragging) setSplit(fromPointer(e)); });
+  const release = () => { dragging = false; };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+
+  const dark = window.matchMedia('(prefers-color-scheme: dark)');
+  const retheme = () => render(true);
+  if (dark.addEventListener) dark.addEventListener('change', retheme); else if (dark.addListener) dark.addListener(retheme);
+  new MutationObserver(retheme).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(canvas); else window.addEventListener('resize', schedule);
+
+  slider.value = String(Math.round(split * 100));
+  render(true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+
+  /* One sweep on load: the divider settles from the right edge to the middle */
+  if (!still) {
+    const t0 = performance.now(), from = split, to = 0.5, dur = 1200;
+    const step = (now) => {
+      if (touched) return;
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      setSplit(from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+})();
+
+(() => {
+  /* Fig. 2: the three lines of work, with papers from the publication list as marks */
+  const host = document.getElementById('lines');
+  if (!host) return;
+  const root = document.documentElement;
+  const NS = 'http://www.w3.org/2000/svg';
+  const lines = [
+    { key: 'brain', label: 'Brain activity and language', start: 2017 + 8 / 12 },
+    { key: 'joints', label: 'Joints and mineralised tissue', start: 2019 + 3 / 12 },
+    { key: 'aggregates', label: 'Cell aggregates and embryos', start: 2026 + 4 / 12 }
+  ];
+  const papers = {};
+  document.querySelectorAll('#publications li[data-line]').forEach((li) => {
+    const year = parseInt(li.querySelector('.when').textContent, 10);
+    if (!year) return;
+    (papers[li.dataset.line] = papers[li.dataset.line] || []).push({ year, lead: li.dataset.lead === '1' });
+  });
+  const el = (name, attrs, text) => {
+    const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  function draw() {
+    const W = host.clientWidth;
+    if (!W) return;
+    const cs = getComputedStyle(root);
+    const tok = (n) => cs.getPropertyValue(n).trim();
+    const ink = tok('--ink'), ink2 = tok('--ink-2'), hema = tok('--hema'), eosin = tok('--eosin'), rule = tok('--line'), slide = tok('--slide');
+    const now = new Date();
+    const tNow = now.getFullYear() + (now.getMonth() + 0.5) / 12;
+    const t0 = 2017, t1 = Math.floor(tNow) + 1.6;
+    const padL = 0, padR = 16, top = 22, rowH = 50, axisH = 28;
+    const H = top + lines.length * rowH + axisH;
+    const x = (t) => padL + ((t - t0) / (t1 - t0)) * (W - padL - padR);
+    const font = 'Archivo, "Helvetica Neue", Arial, sans-serif';
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true' });
+
+    /* Year axis */
+    const ay = H - axisH + 8;
+    svg.appendChild(el('line', { x1: x(t0), y1: ay, x2: x(t1), y2: ay, stroke: rule, 'stroke-width': 1 }));
+    const step = W < 560 ? 2 : 1;
+    for (let y = t0; y <= Math.floor(t1); y++) {
+      svg.appendChild(el('line', { x1: x(y), y1: ay, x2: x(y), y2: ay + 4, stroke: rule, 'stroke-width': 1 }));
+      if ((y - t0) % step === 0) svg.appendChild(el('text', { x: x(y), y: H - 2, 'text-anchor': y === t0 ? 'start' : 'middle', 'font-family': font, 'font-size': 11, 'font-weight': 600, fill: ink2 }, String(y)));
+    }
+
+    lines.forEach((ln, i) => {
+      const yy = top + i * rowH + 26;
+      svg.appendChild(el('text', { x: padL, y: yy - 13, 'font-family': font, 'font-size': 13, 'font-weight': 650, fill: ink }, ln.label));
+      svg.appendChild(el('line', { x1: x(ln.start), y1: yy - 6, x2: x(ln.start), y2: yy + 6, stroke: ink, 'stroke-width': 2 }));
+      svg.appendChild(el('line', { x1: x(ln.start), y1: yy, x2: x(tNow), y2: yy, stroke: ink, 'stroke-width': 2 }));
+      svg.appendChild(el('line', { x1: x(tNow), y1: yy, x2: x(t1), y2: yy, stroke: eosin, 'stroke-width': 2, 'stroke-dasharray': '2 5', 'stroke-linecap': 'round' }));
+      /* Marks, spread within each year */
+      const byYear = {};
+      (papers[ln.key] || []).forEach((p) => { (byYear[p.year] = byYear[p.year] || []).push(p); });
+      Object.keys(byYear).forEach((yr) => {
+        const list = byYear[yr], n = list.length;
+        list.forEach((p, j) => {
+          const t = Number(yr) + 0.12 + 0.76 * ((j + 0.5) / n);
+          const dy = n > 3 ? (j % 2 ? 5 : -5) : 0;
+          svg.appendChild(el('circle', { cx: x(t), cy: yy + dy, r: 4.5, fill: p.lead ? hema : slide, stroke: hema, 'stroke-width': 1.8 }));
+        });
+      });
+    });
+
+    host.replaceChildren(svg);
+    host.setAttribute('aria-label', lines.map((ln) => {
+      const n = (papers[ln.key] || []).length;
+      return `${ln.label}, since ${Math.floor(ln.start)}, ${n} paper${n === 1 ? '' : 's'}`;
+    }).join('; ') + '. All three lines continue to today.');
+  }
+  let pending = 0;
+  const schedule = () => { clearTimeout(pending); pending = setTimeout(draw, 80); };
+  if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(host); else window.addEventListener('resize', schedule);
+  const dark = window.matchMedia('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', draw); else if (dark.addListener) dark.addListener(draw);
+  new MutationObserver(draw).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  draw();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+})();
+
+(() => {
+  /* Fig. 3: coauthor network, built from the publication list */
+  const host = document.getElementById('net');
+  if (!host || !document.createElement('canvas').getContext) return;
+  const root = document.documentElement;
+  const ME = 'P. Durongbhan';
+  const papers = [], sinceYear = new Date().getFullYear() - 1;
+  document.querySelectorAll('#publications li').forEach((li) => {
+    const au = li.querySelector('.au'), when = li.querySelector('.when');
+    if (!au || !when) return;
+    const names = new Set([ME]);
+    au.textContent.replace(/[.*\s]+$/, '').split(',').forEach((s) => {
+      s = s.trim().replace(/\*$/, '').replace(/^and\s+/, '');
+      if (s && !/others|including/.test(s)) names.add(s);
+    });
+    papers.push({ names: [...names], live: parseInt(when.textContent, 10) >= sinceYear });
+  });
+  const count = {}, liveNode = {}, weight = {}, liveEdge = {};
+  papers.forEach(({ names: list, live }) => {
+    list.forEach((n) => { count[n] = (count[n] || 0) + 1; if (live) liveNode[n] = true; });
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      const k = [list[i], list[j]].sort().join('|');
+      weight[k] = (weight[k] || 0) + 1;
+      if (live) liveEdge[k] = true;
+    }
+  });
+  const nodes = Object.keys(count).filter((n) => count[n] >= 2).map((n) => ({ id: n, n: count[n], live: !!liveNode[n] }));
+  const idx = {};
+  nodes.forEach((d, i) => { idx[d.id] = i; });
+  const edges = [];
+  Object.keys(weight).forEach((k) => {
+    const [a, b] = k.split('|');
+    if (a in idx && b in idx) edges.push({ a: idx[a], b: idx[b], w: weight[k], live: !!liveEdge[k] });
+  });
+  const rng = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+  function layout(W, H) {
+    const N = nodes.length, rand = rng(3);
+    const pos = nodes.map((d, i) => {
+      const a = (i / N) * Math.PI * 2 + rand() * 0.3;
+      return { x: W / 2 + Math.cos(a) * W * 0.3, y: H / 2 + Math.sin(a) * H * 0.3, fx: 0, fy: 0 };
+    });
+    const k = Math.sqrt((W * H) / N) * 1.4, iters = 500;
+    for (let it = 0; it < iters; it++) {
+      const temp = 12 * (1 - it / iters) + 0.3;
+      for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {
+        const dx = pos[j].x - pos[i].x, dy = pos[j].y - pos[i].y;
+        const d2 = dx * dx + dy * dy || 1, d = Math.sqrt(d2), f = (k * k) / d2;
+        pos[i].fx -= (dx / d) * f; pos[i].fy -= (dy / d) * f;
+        pos[j].fx += (dx / d) * f; pos[j].fy += (dy / d) * f;
+      }
+      edges.forEach((e) => {
+        const p = pos[e.a], q = pos[e.b];
+        const dx = q.x - p.x, dy = q.y - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        const f = (d * d) / k * 0.003 * Math.min(1 + e.w * 0.25, 2.5);
+        p.fx += (dx / d) * f; p.fy += (dy / d) * f;
+        q.fx -= (dx / d) * f; q.fy -= (dy / d) * f;
+      });
+      pos.forEach((p) => {
+        p.fx += (W / 2 - p.x) * 0.0005; p.fy += (H / 2 - p.y) * 0.002;
+        /* soft walls keep nodes off the edges without lining them up */
+        const wl = Math.max(4, p.x), wr = Math.max(4, W - p.x), wt = Math.max(4, p.y), wb = Math.max(4, H - p.y), kw = k * k * 0.35;
+        p.fx += kw / (wl * wl) - kw / (wr * wr); p.fy += kw / (wt * wt) - kw / (wb * wb);
+        const sp = Math.sqrt(p.fx * p.fx + p.fy * p.fy) || 1, step = Math.min(sp, temp);
+        p.x += (p.fx / sp) * step; p.y += (p.fy / sp) * step;
+        p.fx = p.fy = 0;
+        p.x = Math.min(W - 10, Math.max(10, p.x));
+        p.y = Math.min(H - 10, Math.max(10, p.y));
+      });
+    }
+    /* stretch the settled layout to the block, leaving a small margin */
+    const xs = pos.map((p) => p.x), ys = pos.map(p => p.y), m = 14;
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    pos.forEach((p) => {
+      p.x = x1 > x0 ? m + ((p.x - x0) / (x1 - x0)) * (W - 2 * m) : W / 2;
+      p.y = y1 > y0 ? m + ((p.y - y0) / (y1 - y0)) * (H - 2 * m) : H / 2;
+    });
+    return pos;
+  }
+
+  let canvas = null;
+  function draw() {
+    const W = host.clientWidth, H = host.clientHeight;
+    if (!W || !H || !nodes.length) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (!canvas) { canvas = document.createElement('canvas'); host.replaceChildren(canvas); }
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const cs = getComputedStyle(root), tok = (n) => cs.getPropertyValue(n).trim();
+    const ink2 = tok('--ink-2'), hema = tok('--hema'), eosin = tok('--eosin'), slide = tok('--slide');
+    const pos = layout(W, H);
+    const me = idx[ME];
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.08;
+    edges.forEach((e) => {
+      ctx.strokeStyle = e.live ? eosin : ink2; ctx.lineWidth = Math.min(0.5 + e.w * 0.35, 3);
+      ctx.beginPath(); ctx.moveTo(pos[e.a].x, pos[e.a].y); ctx.lineTo(pos[e.b].x, pos[e.b].y); ctx.stroke();
+    });
+    ctx.globalAlpha = 0.28;
+    nodes.forEach((d, i) => {
+      const p = pos[i], r = i === me ? 4.5 : 2 + Math.min(d.n, 8) * 0.3, c = d.live ? eosin : hema;
+      ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = i === me ? c : slide; ctx.fill();
+      ctx.lineWidth = 1.4; ctx.strokeStyle = c; ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+  }
+  let pending = 0;
+  const schedule = () => { clearTimeout(pending); pending = setTimeout(draw, 80); };
+  if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(host); else window.addEventListener('resize', schedule);
+  const dark = window.matchMedia('(prefers-color-scheme: dark)');
+  if (dark.addEventListener) dark.addEventListener('change', draw); else if (dark.addListener) dark.addListener(draw);
+  new MutationObserver(draw).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  draw();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
