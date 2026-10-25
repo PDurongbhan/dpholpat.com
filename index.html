@@ -699,34 +699,23 @@ footer {
   }
 
   /* Stained section: matrix, pale necrotic core, nuclei dense in the proliferating rim and fragmented in the core.
-     In dark mode the same section is drawn as fluorescence. */
-  function section(n) {
-    const off = document.createElement('canvas');
-    off.width = off.height = n;
-    const c = off.getContext('2d');
+     In dark mode the same section is drawn as fluorescence. The nuclei drift a little, like a live timelapse. */
+  let secCanvas = null, secCtx = null, secN = 0, secPath = null, nuclei = [];
+  function buildSection(n) {
+    secCanvas = document.createElement('canvas');
+    secCanvas.width = secCanvas.height = n;
+    secCtx = secCanvas.getContext('2d');
+    secN = n;
     const cx = n / 2, cy = n / 2, R = n * 0.36;
-    c.fillStyle = tokens.secBg;
-    c.fillRect(0, 0, n, n);
-    const path = new Path2D();
+    secPath = new Path2D();
     for (let k = 0; k <= 360; k++) {
       const th = (k / 360) * Math.PI * 2, rr = R * shape(th);
       const px = cx + rr * Math.cos(th), py = cy + rr * Math.sin(th);
-      if (k) path.lineTo(px, py); else path.moveTo(px, py);
+      if (k) secPath.lineTo(px, py); else secPath.moveTo(px, py);
     }
-    path.closePath();
-    c.fillStyle = tokens.secMatrix;
-    c.fill(path);
-    const [cr, cg, cb] = rgb(tokens.secCore);
-    const core = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.6);
-    core.addColorStop(0, `rgba(${cr},${cg},${cb},1)`);
-    core.addColorStop(0.65, `rgba(${cr},${cg},${cb},0.9)`);
-    core.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-    c.fillStyle = core;
-    c.fill(path);
-    const [nr, ng, nb] = rgb(tokens.secNuc);
-    const fluor = tokens.mode === 'fluor';
-    if (fluor) c.globalCompositeOperation = 'lighter';
+    secPath.closePath();
     const rand = rng(11), rn = R * 0.019;
+    nuclei = [];
     for (let placed = 0, tries = 0; placed < 900 && tries < 30000; tries++) {
       const px = cx + (rand() * 2 - 1) * R * 1.06, py = cy + (rand() * 2 - 1) * R * 1.06;
       const dx = px - cx, dy = py - cy;
@@ -736,18 +725,45 @@ footer {
       if (rand() > keep) continue;
       const debris = r < 0.45;
       const rad = rn * (debris ? 0.4 + rand() * 0.3 : 0.8 + rand() * 0.45);
-      const alpha = debris ? 0.32 : fluor ? 0.55 + rand() * 0.3 : 0.7 + rand() * 0.25;
+      nuclei.push({
+        x: px, y: py, rx: rad * (1 + rand() * 0.35), ry: rad, rot: rand() * Math.PI, debris,
+        a: debris ? 0.32 : 0.55 + rand() * 0.3,
+        p1: rand() * Math.PI * 2, p2: rand() * Math.PI * 2,
+        w1: (Math.PI * 2) / (6 + rand() * 8), w2: (Math.PI * 2) / (6 + rand() * 8)
+      });
+      placed++;
+    }
+  }
+  function drawSection(t) {
+    const n = secN, c = secCtx;
+    if (!c) return;
+    const cx = n / 2, cy = n / 2, R = n * 0.36, amp = n * 0.0035;
+    c.fillStyle = tokens.secBg;
+    c.fillRect(0, 0, n, n);
+    c.fillStyle = tokens.secMatrix;
+    c.fill(secPath);
+    const [cr, cg, cb] = rgb(tokens.secCore);
+    const core = c.createRadialGradient(cx, cy, 0, cx, cy, R * 0.6);
+    core.addColorStop(0, `rgba(${cr},${cg},${cb},1)`);
+    core.addColorStop(0.65, `rgba(${cr},${cg},${cb},0.9)`);
+    core.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+    c.fillStyle = core;
+    c.fill(secPath);
+    const [nr, ng, nb] = rgb(tokens.secNuc);
+    const fluor = tokens.mode === 'fluor';
+    if (fluor) c.globalCompositeOperation = 'lighter';
+    for (const q of nuclei) {
+      const dx = amp * Math.sin(q.w1 * t + q.p1), dy = amp * Math.cos(q.w2 * t + q.p2);
+      const alpha = q.debris ? q.a : fluor ? q.a : q.a + 0.15;
       c.fillStyle = `rgba(${nr},${ng},${nb},${alpha.toFixed(3)})`;
       c.beginPath();
-      c.ellipse(px, py, rad * (1 + rand() * 0.35), rad, rand() * Math.PI, 0, Math.PI * 2);
+      c.ellipse(q.x + dx, q.y + dy, q.rx, q.ry, q.rot, 0, Math.PI * 2);
       c.fill();
-      placed++;
     }
     c.globalCompositeOperation = 'source-over';
     c.strokeStyle = tokens.secEdge;
     c.lineWidth = Math.max(1, n * 0.003);
-    c.stroke(path);
-    return off;
+    c.stroke(secPath);
   }
 
   function roundRect(x, y, w, h, r) {
@@ -802,7 +818,9 @@ footer {
     built = key;
     canvas.width = canvas.height = n;
     imgA = brightfield(n);
-    imgB = section(n);
+    buildSection(n);
+    drawSection(0);
+    imgB = secCanvas;
     draw();
   }
   const schedule = () => { clearTimeout(pending); pending = setTimeout(() => render(false), 120); };
@@ -830,6 +848,29 @@ footer {
   slider.value = String(Math.round(split * 100));
   render(true);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+
+  /* The nuclei drift while the figure is on screen; not under reduced motion */
+  let animating = false, raf = 0, onScreen = true, lastFrame = 0;
+  function frame(now) {
+    if (!animating) return;
+    raf = requestAnimationFrame(frame);
+    if (now - lastFrame < 33) return;
+    lastFrame = now;
+    drawSection(now / 1000);
+    draw();
+  }
+  function setAnimating(on) {
+    on = on && !still;
+    if (on === animating) return;
+    animating = on;
+    if (on) raf = requestAnimationFrame(frame); else cancelAnimationFrame(raf);
+  }
+  if (!still) {
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => { onScreen = entries[0].isIntersecting; setAnimating(onScreen && !document.hidden); }).observe(canvas);
+    } else setAnimating(true);
+    document.addEventListener('visibilitychange', () => setAnimating(onScreen && !document.hidden));
+  }
 
   /* One sweep on load: the divider settles from the right edge to the middle */
   if (!still) {
