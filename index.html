@@ -69,6 +69,15 @@
   --sec-mode: stain;
   --fig-handle: #F4F5F9;
   --scale-bg: rgba(244, 245, 249, 0.86);
+  /* Joint: CT greys, segmented tissues */
+  --ct-dark: #121319;
+  --ct-light: #F3F4F8;
+  --seg-bg: #F4F5F9;
+  --seg-cart: #7BC4BD;
+  --seg-cc: #E3A9BE;
+  --seg-sbp: #3A3F9E;
+  --seg-tb: #8E92CC;
+  --seg-marrow: #E6E7F0;
   /* Type */
   --font-display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-text: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
@@ -94,6 +103,12 @@
     --sec-mode: fluor;
     --fig-handle: #121427;
     --scale-bg: rgba(18, 20, 39, 0.8);
+    --seg-bg: #090A16;
+    --seg-cart: #3E8F89;
+    --seg-cc: #8A3F5E;
+    --seg-sbp: #9EA3FF;
+    --seg-tb: #5A5F9E;
+    --seg-marrow: #1E2140;
     color-scheme: dark;
   }
 }
@@ -115,6 +130,12 @@
   --sec-mode: fluor;
   --fig-handle: #121427;
   --scale-bg: rgba(18, 20, 39, 0.8);
+  --seg-bg: #090A16;
+  --seg-cart: #3E8F89;
+  --seg-cc: #8A3F5E;
+  --seg-sbp: #9EA3FF;
+  --seg-tb: #5A5F9E;
+  --seg-marrow: #1E2140;
   color-scheme: dark;
 }
 
@@ -195,6 +216,15 @@ a:hover { text-decoration-color: var(--eosin); }
 
 /* Fig. 1 */
 .fig { margin: 0; display: grid; gap: 0.5rem; min-width: 0; }
+.fig-tabs { display: flex; gap: 1.25rem; }
+.fig-tabs [role="tab"] {
+  min-height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: 600 0.9375rem/1 var(--font-display); color: var(--ink-2);
+  border-bottom: 2px solid transparent;
+}
+.fig-tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--hema); }
+.fig-tabs [role="tab"]:hover { color: var(--ink); }
+.fig figcaption[hidden] { display: none; }
 .fig-labels {
   display: flex; justify-content: space-between; gap: 1rem;
   font-family: var(--font-display); font-size: 0.8125rem; font-weight: 600; color: var(--ink-2);
@@ -340,13 +370,18 @@ footer {
   </div>
 
   <figure class="fig">
-    <div class="fig-labels" aria-hidden="true"><span>Routine image</span><span>Gold standard</span></div>
+    <div class="fig-tabs" role="tablist" aria-label="Two examples">
+      <button type="button" role="tab" id="tab-aggregate" aria-selected="true" aria-controls="aggregate" data-scene="aggregate">Cell aggregate</button>
+      <button type="button" role="tab" id="tab-joint" aria-selected="false" aria-controls="aggregate" data-scene="joint" tabindex="-1">Joint</button>
+    </div>
+    <div class="fig-labels" aria-hidden="true"><span id="fig-label-l">Routine image</span><span id="fig-label-r">Gold standard</span></div>
     <div class="fig-frame">
       <canvas id="aggregate" width="600" height="600" role="img" aria-label="Schematic of a cell aggregate about 500 micrometres across. Left of the divider is a routine brightfield image; right of the divider is the stained section it stands in for. A scale bar marks 100 micrometres."></canvas>
     </div>
     <label class="sr-only" for="split">Divider between routine image and gold standard</label>
     <input type="range" id="split" min="0" max="100" value="50">
-    <figcaption><b>Fig. 1.</b> A cell aggregate about 500&nbsp;µm across, drawn as a routine brightfield image (left) and as the stained section it stands in for (right). My pipelines aim to read the right from the left without cutting anything. Drag the divider to compare. Schematic, not data.</figcaption>
+    <figcaption data-scene="aggregate"><b>Fig. 1.</b> A cell aggregate about 500&nbsp;µm across, drawn as a routine brightfield image (left) and as the stained section it stands in for (right). My pipelines aim to read the right from the left without cutting anything. Drag the divider to compare. Schematic, not data.</figcaption>
+    <figcaption data-scene="joint" hidden><b>Fig. 1.</b> A joint cross-section about 1.7&nbsp;mm wide, drawn as a microCT slice (left) and as the tissue map a segmentation pipeline reads from it (right): cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. Drag the divider to compare. Schematic, not data.</figcaption>
   </figure>
 </header>
 
@@ -613,14 +648,18 @@ footer {
 })();
 
 (() => {
-  /* Fig. 1: a schematic cell aggregate, brightfield on the left of the divider, stained section on the right */
+  /* Fig. 1: two schematic pairs behind one divider. The cell aggregate: brightfield on the left, stained section
+     on the right. The joint: a microCT slice on the left, the segmented tissue map on the right. */
   const root = document.documentElement;
   const canvas = document.getElementById('aggregate');
   const slider = document.getElementById('split');
+  const tabs = Array.from(document.querySelectorAll('.fig-tabs [role="tab"]'));
+  const labelL = document.getElementById('fig-label-l'), labelR = document.getElementById('fig-label-r');
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d');
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  let scene = 'aggregate';
   let imgA = null, imgB = null, built = '', tokens = {}, pending = 0;
   let split = still ? 0.5 : 0.97;
   let touched = false;
@@ -635,10 +674,9 @@ footer {
   const rgb = (hex) => {
     let h = hex.replace('#', '').trim();
     if (h.length === 3) h = h.split('').map((c) => c + c).join('');
-    const n = parseInt(h.slice(0, 6), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    const v = parseInt(h.slice(0, 6), 16);
+    return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
   };
-  /* The aggregate is not a perfect circle */
   const shape = (th) => 1 + 0.028 * Math.sin(3 * th + 1.1) + 0.017 * Math.sin(5 * th + 0.4) + 0.009 * Math.sin(9 * th + 2.0);
   const noise = (rand, n) => {
     const w = n + 1, g = new Float32Array(w * w);
@@ -660,11 +698,13 @@ footer {
       bfDark: get('--bf-dark'), bfLight: get('--bf-light'),
       secBg: get('--sec-bg'), secMatrix: get('--sec-matrix'), secCore: get('--sec-core'),
       secNuc: get('--sec-nuc'), secEdge: get('--sec-edge'), mode: get('--sec-mode'),
+      ctDark: get('--ct-dark'), ctLight: get('--ct-light'),
+      seg: [get('--seg-bg'), get('--seg-cart'), get('--seg-cc'), get('--seg-sbp'), get('--seg-tb'), get('--seg-marrow')],
       ink: get('--ink'), handle: get('--fig-handle'), scaleBg: get('--scale-bg')
     };
   }
 
-  /* Brightfield: dark necrotic core, darker refractive rim, faint halo outside, grain */
+  /* ---------- Scene 1: the cell aggregate ---------- */
   function brightfield(n) {
     const off = document.createElement('canvas');
     off.width = off.height = n;
@@ -698,8 +738,6 @@ footer {
     return off;
   }
 
-  /* Stained section: matrix, pale necrotic core, nuclei dense in the proliferating rim and fragmented in the core.
-     In dark mode the same section is drawn as fluorescence. The nuclei drift a little, like a live timelapse. */
   let secCanvas = null, secCtx = null, secN = 0, secPath = null, nuclei = [];
   function buildSection(n) {
     secCanvas = document.createElement('canvas');
@@ -766,6 +804,123 @@ footer {
     c.stroke(secPath);
   }
 
+  /* ---------- Scene 2: the joint ---------- */
+  /* Tissue ids are computed per pixel from the layer boundaries (no anti-aliasing to confuse them);
+     marrow spaces and canals come from a thresholded mask. Both panels are derived from the same ids:
+     the microCT slice from attenuation-like greys with grain and lacunae, the tissue map from flat colours. */
+  function jointPanels(n) {
+    const rand = rng(23);
+    const surf = (x) => n * 0.30 + n * 0.035 * Math.sin((x / n) * Math.PI * 1.1 + 0.4) + n * 0.012 * Math.sin((x / n) * Math.PI * 4.3 + 1.0);
+    const cartT = n * 0.075, ccT = n * 0.02, plateT = n * 0.11;
+    const plateBottom = (x) => surf(x) + cartT + ccT + plateT + n * 0.02 * Math.sin((x / n) * Math.PI * 5 + 2.2) + n * 0.015 * Math.sin((x / n) * Math.PI * 9 + 0.3);
+    const ys = new Float32Array(n), yc = new Float32Array(n), yp = new Float32Array(n), yb = new Float32Array(n);
+    for (let x = 0; x < n; x++) { ys[x] = surf(x); yc[x] = ys[x] + cartT; yp[x] = yc[x] + ccT; yb[x] = plateBottom(x); }
+
+    /* mask: red = bone below the plate, drawn as a network of struts on a jittered hex lattice
+       over a marrow background; green = canals through the plate */
+    const mk = document.createElement('canvas');
+    mk.width = mk.height = n;
+    const m = mk.getContext('2d');
+    const clampX = (x) => Math.min(n - 1, Math.max(0, x));
+    m.fillStyle = '#000';
+    m.fillRect(0, 0, n, n);
+    m.fillStyle = '#f00';
+    m.strokeStyle = '#f00';
+    m.lineCap = 'round';
+    const sx = n * 0.115, sy = n * 0.1, rows = [];
+    for (let r = 0; r < 9; r++) {
+      const pts = [];
+      for (let c = -1; c <= n / sx + 1; c++) {
+        const x = (c + (r % 2) * 0.5 + (rand() - 0.5) * 0.5) * sx;
+        const y = plateBottom(clampX(x)) + n * 0.035 + (r + (rand() - 0.5) * 0.45) * sy;
+        pts.push({ x, y });
+      }
+      rows.push(pts);
+    }
+    const strut = (a, b, w) => {
+      const dx = b.x - a.x, dy = b.y - a.y, bend = (rand() - 0.5) * 0.5;
+      m.lineWidth = w;
+      m.beginPath();
+      m.moveTo(a.x, a.y);
+      m.quadraticCurveTo((a.x + b.x) / 2 - dy * bend, (a.y + b.y) / 2 + dx * bend, b.x, b.y);
+      m.stroke();
+    };
+    const width = () => n * (0.012 + rand() * 0.016);
+    for (let r = 0; r < rows.length; r++) {
+      for (let c = 0; c < rows[r].length; c++) {
+        const a = rows[r][c], w = width();
+        if (c + 1 < rows[r].length && rand() < 0.72) strut(a, rows[r][c + 1], w);
+        if (r + 1 < rows.length) {
+          for (const k of (r % 2 === 0 ? [c - 1, c] : [c, c + 1])) {
+            if (k >= 0 && k < rows[r + 1].length && rand() < 0.7) strut(a, rows[r + 1][k], width());
+          }
+        }
+        if (r === 0 && rand() < 0.75) strut(a, { x: a.x + (rand() - 0.5) * sx * 0.3, y: plateBottom(clampX(a.x)) - n * 0.01 }, width());
+        m.beginPath(); m.arc(a.x, a.y, w * 0.75, 0, Math.PI * 2); m.fill();
+      }
+    }
+    /* the bone right under the plate is denser: a band of marrow is left only where struts are absent */
+    m.fillStyle = '#0f0';
+    for (let i = 0; i < 10; i++) {
+      const x = n * (0.05 + rand() * 0.9), r = n * (0.004 + rand() * 0.006);
+      const y = yp[x | 0] + plateT * (0.3 + rand() * 0.5);
+      m.beginPath(); m.arc(x, y, r, 0, Math.PI * 2); m.fill();
+    }
+    const mask = m.getImageData(0, 0, n, n).data;
+
+    const slice = document.createElement('canvas'), map = document.createElement('canvas');
+    slice.width = slice.height = map.width = map.height = n;
+    const cs = slice.getContext('2d'), cm = map.getContext('2d');
+    const imgS = cs.createImageData(n, n), ds = imgS.data;
+    const imgM = cm.createImageData(n, n), dm = imgM.data;
+    const lo = rgb(tokens.ctDark), hi = rgb(tokens.ctLight);
+    const pal = tokens.seg.map(rgb);
+    const grey = [0.1, 0.36, 0.6, 0.93, 0.88, 0.2];
+    const fine = noise(rand, 48), coarse = noise(rand, 9);
+    const ids = new Uint8Array(n * n);
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const k = y * n + x, i = k * 4;
+        let id = y < ys[x] ? 0 : y < yc[x] ? 1 : y < yp[x] ? 2 : y < yb[x] ? 3 : 4;
+        if (id === 4 && mask[i] < 128) id = 5; else if (id === 3 && mask[i + 1] > 127) id = 5;
+        ids[k] = id;
+        const u = x / n, v = y / n;
+        let t = grey[id] + (fine(u, v) - 0.5) * (id >= 3 ? 0.16 : 0.07) + (coarse(u, v) - 0.5) * 0.08 + (rand() - 0.5) * 0.05;
+        if (id === 0) t += 0.05 * v;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        ds[i] = lo[0] + (hi[0] - lo[0]) * t; ds[i + 1] = lo[1] + (hi[1] - lo[1]) * t; ds[i + 2] = lo[2] + (hi[2] - lo[2]) * t; ds[i + 3] = 255;
+        const p = pal[id];
+        dm[i] = p[0]; dm[i + 1] = p[1]; dm[i + 2] = p[2]; dm[i + 3] = 255;
+      }
+    }
+    cs.putImageData(imgS, 0, 0);
+    cm.putImageData(imgM, 0, 0);
+    /* osteocyte lacunae in the bone, slice only */
+    cs.fillStyle = `rgba(${lo[0]},${lo[1]},${lo[2]},0.7)`;
+    for (let placed = 0, tries = 0; placed < 450 && tries < 20000; tries++) {
+      const x = (rand() * n) | 0, y = (rand() * n) | 0, id = ids[y * n + x];
+      if (id !== 3 && id !== 4) continue;
+      cs.beginPath(); cs.ellipse(x, y, n * 0.0025, n * 0.0016, rand() * Math.PI, 0, Math.PI * 2); cs.fill();
+      placed++;
+    }
+    return { slice, map };
+  }
+
+  const scenes = {
+    aggregate: {
+      labels: ['Routine image', 'Gold standard'], scale: { frac: 0.144, text: '100 µm' },
+      aria: 'Schematic of a cell aggregate about 500 micrometres across. Left of the divider is a routine brightfield image; right of the divider is the stained section it stands in for. A scale bar marks 100 micrometres.',
+      build(n) { imgA = brightfield(n); buildSection(n); drawSection(0); imgB = secCanvas; },
+      tick(t) { drawSection(t); }
+    },
+    joint: {
+      labels: ['MicroCT slice', 'Segmented tissues'], scale: { frac: 0.3, text: '500 µm' },
+      aria: 'Schematic cross-section of a joint about 1.7 millimetres wide. Left of the divider is a microCT slice in greys; right of the divider is the same slice segmented into cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. A scale bar marks 500 micrometres.',
+      build(n) { const p = jointPanels(n); imgA = p.slice; imgB = p.map; },
+      tick: null
+    }
+  };
+
   function roundRect(x, y, w, h, r) {
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
@@ -778,7 +933,6 @@ footer {
     if (x > 0) ctx.drawImage(imgA, 0, 0, x, n, 0, 0, x, n);
     if (x < n) ctx.drawImage(imgB, x, 0, n - x, n, x, 0, n - x, n);
 
-    /* Divider and handle */
     ctx.fillStyle = tokens.ink;
     ctx.fillRect(x - lw / 2, 0, lw, n);
     const hr = n * 0.034, hy = n * 0.5, a = hr * 0.42;
@@ -793,8 +947,8 @@ footer {
     ctx.beginPath(); ctx.moveTo(x - a * 0.35, hy - a); ctx.lineTo(x - a * 1.25, hy); ctx.lineTo(x - a * 0.35, hy + a); ctx.closePath(); ctx.fill();
     ctx.beginPath(); ctx.moveTo(x + a * 0.35, hy - a); ctx.lineTo(x + a * 1.25, hy); ctx.lineTo(x + a * 0.35, hy + a); ctx.closePath(); ctx.fill();
 
-    /* Scale bar: the aggregate is drawn 500 µm across (0.72 of the frame), so 100 µm is 0.144 of the frame */
-    const bw = n * 0.144, bh = Math.max(3, Math.round(n * 0.008));
+    const sc = scenes[scene].scale;
+    const bw = n * sc.frac, bh = Math.max(3, Math.round(n * 0.008));
     const bx = n * 0.06, by = n * 0.925, fs = Math.round(n * 0.034), pad = n * 0.018;
     const top = by - fs - pad * 1.6;
     ctx.fillStyle = tokens.scaleBg;
@@ -804,26 +958,48 @@ footer {
     ctx.fillRect(bx, by, bw, bh);
     ctx.font = `600 ${fs}px Archivo, "Helvetica Neue", Arial, sans-serif`;
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('100 µm', bx, by - pad * 0.6);
+    ctx.textAlign = 'left';
+    ctx.fillText(sc.text, bx, by - pad * 0.6);
   }
 
-  /* Rebuild both images when the size or the theme changes */
   function render(force) {
     const css = canvas.clientWidth;
     if (!css) return;
     const n = Math.round(css * Math.min(2, window.devicePixelRatio || 1));
     readTokens();
-    const key = n + '|' + tokens.secBg + '|' + tokens.bfLight;
+    const key = scene + '|' + n + '|' + tokens.secBg + '|' + tokens.bfLight + '|' + tokens.seg.join(',');
     if (!force && key === built) { draw(); return; }
     built = key;
     canvas.width = canvas.height = n;
-    imgA = brightfield(n);
-    buildSection(n);
-    drawSection(0);
-    imgB = secCanvas;
+    scenes[scene].build(n);
     draw();
   }
   const schedule = () => { clearTimeout(pending); pending = setTimeout(() => render(false), 120); };
+
+  function setScene(name) {
+    if (!scenes[name] || name === scene) return;
+    scene = name;
+    const sc = scenes[name];
+    if (labelL) labelL.textContent = sc.labels[0];
+    if (labelR) labelR.textContent = sc.labels[1];
+    canvas.setAttribute('aria-label', sc.aria);
+    tabs.forEach((b) => {
+      const on = b.dataset.scene === name;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+    document.querySelectorAll('.fig figcaption[data-scene]').forEach((cap) => { cap.hidden = cap.dataset.scene !== name; });
+    render(true);
+    setAnimating(wantAnim());
+  }
+  tabs.forEach((b) => {
+    b.addEventListener('click', () => setScene(b.dataset.scene));
+    b.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const i = tabs.indexOf(b), nb = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      nb.focus(); setScene(nb.dataset.scene);
+    });
+  });
 
   function setSplit(v) {
     split = Math.min(1, Math.max(0, v));
@@ -851,12 +1027,13 @@ footer {
 
   /* The nuclei drift while the figure is on screen; not under reduced motion */
   let animating = false, raf = 0, onScreen = true, lastFrame = 0;
+  const wantAnim = () => onScreen && !document.hidden && !!scenes[scene].tick;
   function frame(now) {
     if (!animating) return;
     raf = requestAnimationFrame(frame);
     if (now - lastFrame < 33) return;
     lastFrame = now;
-    drawSection(now / 1000);
+    scenes[scene].tick(now / 1000);
     draw();
   }
   function setAnimating(on) {
@@ -867,9 +1044,9 @@ footer {
   }
   if (!still) {
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver((entries) => { onScreen = entries[0].isIntersecting; setAnimating(onScreen && !document.hidden); }).observe(canvas);
-    } else setAnimating(true);
-    document.addEventListener('visibilitychange', () => setAnimating(onScreen && !document.hidden));
+      new IntersectionObserver((entries) => { onScreen = entries[0].isIntersecting; setAnimating(wantAnim()); }).observe(canvas);
+    } else setAnimating(wantAnim());
+    document.addEventListener('visibilitychange', () => setAnimating(wantAnim()));
   }
 
   /* One sweep on load: the divider settles from the right edge to the middle */
