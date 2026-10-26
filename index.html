@@ -381,7 +381,7 @@ footer {
     <label class="sr-only" for="split">Divider between routine image and gold standard</label>
     <input type="range" id="split" min="0" max="100" value="50">
     <figcaption data-scene="aggregate"><b>Fig. 1.</b> A cell aggregate about 500&nbsp;µm across, drawn as a routine brightfield image (left) and as the stained section it stands in for (right). My pipelines aim to read the right from the left without cutting anything. Drag the divider to compare. Schematic, not data.</figcaption>
-    <figcaption data-scene="joint" hidden><b>Fig. 1.</b> A joint cross-section about 1.7&nbsp;mm wide, drawn as a microCT slice (left) and as the tissue map a segmentation pipeline reads from it (right): cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. Drag the divider to compare. Schematic, not data.</figcaption>
+    <figcaption data-scene="joint" hidden><b>Fig. 1.</b> A mouse joint cross-section about 0.7&nbsp;mm wide, drawn as a microCT slice (left) and as the tissue map a segmentation pipeline reads from it (right): cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. The map is where the numbers come from: cartilage and plate thickness, trabecular separation. Drag the divider to compare. Schematic, not data.</figcaption>
   </figure>
 </header>
 
@@ -660,7 +660,7 @@ footer {
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let scene = 'aggregate';
-  let imgA = null, imgB = null, built = '', tokens = {}, pending = 0;
+  let imgA = null, imgB = null, tokens = {}, pending = 0;
   let split = still ? 0.5 : 0.97;
   let touched = false;
 
@@ -805,68 +805,99 @@ footer {
   }
 
   /* ---------- Scene 2: the joint ---------- */
-  /* Tissue ids are computed per pixel from the layer boundaries (no anti-aliasing to confuse them);
-     marrow spaces and canals come from a thresholded mask. Both panels are derived from the same ids:
-     the microCT slice from attenuation-like greys with grain and lacunae, the tissue map from flat colours. */
-  function jointPanels(n) {
-    const rand = rng(23);
-    const surf = (x) => n * 0.30 + n * 0.035 * Math.sin((x / n) * Math.PI * 1.1 + 0.4) + n * 0.012 * Math.sin((x / n) * Math.PI * 4.3 + 1.0);
-    const cartT = n * 0.075, ccT = n * 0.02, plateT = n * 0.11;
-    const plateBottom = (x) => surf(x) + cartT + ccT + plateT + n * 0.02 * Math.sin((x / n) * Math.PI * 5 + 2.2) + n * 0.015 * Math.sin((x / n) * Math.PI * 9 + 0.3);
-    const ys = new Float32Array(n), yc = new Float32Array(n), yp = new Float32Array(n), yb = new Float32Array(n);
-    for (let x = 0; x < n; x++) { ys[x] = surf(x); yc[x] = ys[x] + cartT; yp[x] = yc[x] + ccT; yb[x] = plateBottom(x); }
-
-    /* mask: red = bone below the plate, drawn as a network of struts on a jittered hex lattice
-       over a marrow background; green = canals through the plate */
-    const mk = document.createElement('canvas');
-    mk.width = mk.height = n;
-    const m = mk.getContext('2d');
-    const clampX = (x) => Math.min(n - 1, Math.max(0, x));
-    m.fillStyle = '#000';
-    m.fillRect(0, 0, n, n);
-    m.fillStyle = '#f00';
-    m.strokeStyle = '#f00';
-    m.lineCap = 'round';
-    const sx = n * 0.115, sy = n * 0.1, rows = [];
-    for (let r = 0; r < 9; r++) {
-      const pts = [];
-      for (let c = -1; c <= n / sx + 1; c++) {
-        const x = (c + (r % 2) * 0.5 + (rand() - 0.5) * 0.5) * sx;
-        const y = plateBottom(clampX(x)) + n * 0.035 + (r + (rand() - 0.5) * 0.45) * sy;
-        pts.push({ x, y });
+  /* A mouse tibial plateau at the same scale as the aggregate (the field is about 694 µm wide).
+     Tissue ids are computed per pixel from the layer boundaries; trabeculae and plate canals come from a mask.
+     Both panels are derived from the same ids: the microCT slice from attenuation-like greys, in which the
+     cartilage barely separates from the background and the calcified layer nearly merges with the plate,
+     and the tissue map from flat colours. */
+  /* box blur of a square n x n field in place, edges clamped; both passes walk rows for speed */
+  function blur1(a, n, r) {
+    const tmp = new Float32Array(n * n), inv = 1 / (2 * r + 1), col = new Float32Array(n);
+    for (let y = 0; y < n; y++) {
+      const row = y * n;
+      let acc = a[row] * (r + 1);
+      for (let x = 1; x <= r; x++) acc += a[row + Math.min(n - 1, x)];
+      for (let x = 0; x < n; x++) {
+        tmp[row + x] = acc * inv;
+        const xa = x + r + 1, xr = x - r;
+        acc += a[row + (xa < n ? xa : n - 1)] - a[row + (xr > 0 ? xr : 0)];
       }
-      rows.push(pts);
     }
-    const strut = (a, b, w) => {
-      const dx = b.x - a.x, dy = b.y - a.y, bend = (rand() - 0.5) * 0.5;
-      m.lineWidth = w;
-      m.beginPath();
-      m.moveTo(a.x, a.y);
-      m.quadraticCurveTo((a.x + b.x) / 2 - dy * bend, (a.y + b.y) / 2 + dx * bend, b.x, b.y);
-      m.stroke();
-    };
-    const width = () => n * (0.012 + rand() * 0.016);
-    for (let r = 0; r < rows.length; r++) {
-      for (let c = 0; c < rows[r].length; c++) {
-        const a = rows[r][c], w = width();
-        if (c + 1 < rows[r].length && rand() < 0.72) strut(a, rows[r][c + 1], w);
-        if (r + 1 < rows.length) {
-          for (const k of (r % 2 === 0 ? [c - 1, c] : [c, c + 1])) {
-            if (k >= 0 && k < rows[r + 1].length && rand() < 0.7) strut(a, rows[r + 1][k], width());
+    for (let x = 0; x < n; x++) col[x] = tmp[x] * (r + 1);
+    for (let y = 1; y <= r; y++) { const row = Math.min(n - 1, y) * n; for (let x = 0; x < n; x++) col[x] += tmp[row + x]; }
+    for (let y = 0; y < n; y++) {
+      const row = y * n, ya = Math.min(n - 1, y + r + 1) * n, yr = Math.max(0, y - r) * n;
+      for (let x = 0; x < n; x++) { a[row + x] = col[x] * inv; col[x] += tmp[ya + x] - tmp[yr + x]; }
+    }
+  }
+  function jointPanels(n) {
+    const rand = rng(23), TAU = Math.PI * 2, sin = Math.sin;
+    const um = n / (100 / 0.144);
+    /* uncalcified cartilage about 110 µm; calcified cartilage and the subchondral plate in proportion to it */
+    const U = 110 * um, C = 0.84 * U, P = 0.53 * U;
+    const wave = (x, a1, l1, p1, a2, l2, p2) => um * (a1 * sin((TAU * x) / (l1 * um) + p1) + a2 * sin((TAU * x) / (l2 * um) + p2));
+    const ys = new Float32Array(n), yc = new Float32Array(n), yp = new Float32Array(n), yb = new Float32Array(n);
+    for (let x = 0; x < n; x++) {
+      ys[x] = 72 * um + wave(x, 8, 1250, 0.4, 3, 310, 1.0);           /* cartilage surface */
+      yc[x] = ys[x] + U + wave(x, 4.5, 50, 0.7, 1.5, 23, 2.1);          /* tidemark */
+      yp[x] = ys[x] + U + C + wave(x, 6, 65, 1.9, 2, 29, 0.2);         /* cement line */
+      yb[x] = ys[x] + U + C + P + wave(x, 12, 180, 2.2, 6, 70, 0.3);   /* plate into trabecular bone */
+    }
+
+    /* Trabecular bone: the walls of a warped Voronoi tessellation, thicker near the plate,
+       with the corners of the marrow spaces rounded by a blur and threshold */
+    const L = 92 * um, gw = Math.ceil(n / L) + 3, pts = new Float32Array(gw * gw * 2);
+    for (let j = 0; j < gw; j++) for (let i = 0; i < gw; i++) {
+      pts[(j * gw + i) * 2] = (i - 1 + 0.5 + (rand() - 0.5) * 0.85) * L;
+      pts[(j * gw + i) * 2 + 1] = (j - 1 + 0.5 + (rand() - 0.5) * 0.85) * L;
+    }
+    const warpA = noise(rand, 7), warpB = noise(rand, 7), thick = noise(rand, 12), W = 34 * um;
+    /* computed on a grid four pixels apart, blurred there, then read back bilinearly */
+    const step = 4, h = Math.ceil(n / step) + 2, field = new Float32Array(h * h);
+    for (let gy4 = 0; gy4 < h; gy4++) {
+      for (let gx4 = 0; gx4 < h; gx4++) {
+        const x = Math.min(n - 1, gx4 * step), y = gy4 * step;
+        if (y < yb[x] - step) { field[gy4 * h + gx4] = 1; continue; }
+        const u = x / n, v = y / n;
+        const xw = x + W * (warpA(u, v) - 0.5) * 2, yw = y + W * (warpB(u, v) - 0.5) * 2;
+        const gx = Math.floor(xw / L) + 1, gy = Math.floor(yw / L) + 1;
+        let d1 = 1e18, d2 = 1e18, a1 = 0, a2 = 0;
+        for (let j = gy - 1; j <= gy + 1; j++) {
+          if (j < 0 || j >= gw) continue;
+          for (let i = gx - 1; i <= gx + 1; i++) {
+            if (i < 0 || i >= gw) continue;
+            const q = (j * gw + i) * 2, dx = pts[q] - xw, dy = pts[q + 1] - yw, d = dx * dx + dy * dy;
+            if (d < d1) { d2 = d1; a2 = a1; d1 = d; a1 = q; } else if (d < d2) { d2 = d; a2 = q; }
           }
         }
-        if (r === 0 && rand() < 0.75) strut(a, { x: a.x + (rand() - 0.5) * sx * 0.3, y: plateBottom(clampX(a.x)) - n * 0.01 }, width());
-        m.beginPath(); m.arc(a.x, a.y, w * 0.75, 0, Math.PI * 2); m.fill();
+        const ex = pts[a2] - pts[a1], ey = pts[a2 + 1] - pts[a1 + 1];
+        const edge = (d2 - d1) / (2 * (Math.sqrt(ex * ex + ey * ey) || 1));
+        const depth = Math.min(1, Math.max(0, (y - yb[x]) / (320 * um)));
+        field[gy4 * h + gx4] = edge < um * (19 - 8 * depth) * (0.7 + 0.6 * thick(u, v)) ? 1 : 0;
       }
     }
-    /* the bone right under the plate is denser: a band of marrow is left only where struts are absent */
-    m.fillStyle = '#0f0';
-    for (let i = 0; i < 10; i++) {
-      const x = n * (0.05 + rand() * 0.9), r = n * (0.004 + rand() * 0.006);
-      const y = yp[x | 0] + plateT * (0.3 + rand() * 0.5);
-      m.beginPath(); m.arc(x, y, r, 0, Math.PI * 2); m.fill();
+    blur1(field, h, Math.max(1, Math.round((7 * um) / step)));
+    const boneAt = (x, y) => {
+      const fx = x / step, fy = y / step, xi = fx | 0, yi = fy | 0, ax = fx - xi, ay = fy - yi, i0 = yi * h + xi;
+      return (field[i0] * (1 - ax) + field[i0 + 1] * ax) * (1 - ay) + (field[i0 + h] * (1 - ax) + field[i0 + h + 1] * ax) * ay;
+    };
+
+    /* a few small vascular canals in the upper part of the plate */
+    const canals = [];
+    for (let i = 0; i < 7; i++) {
+      const x = n * (0.05 + rand() * 0.9), xi = x | 0, rx = um * (4 + rand() * 3);
+      const ry = rx * (1 + rand() * 0.6), rot = (rand() - 0.5) * 0.8;
+      canals.push({ x, y: yp[xi] + (0.25 + rand() * 0.35) * (yb[xi] - yp[xi]), rx, ry, cr: Math.cos(rot), sr: Math.sin(rot), r: Math.max(rx, ry) });
     }
-    const mask = m.getImageData(0, 0, n, n).data;
+    const inCanal = (x, y) => {
+      for (let i = 0; i < canals.length; i++) {
+        const c = canals[i], dx = x - c.x, dy = y - c.y;
+        if (dx > c.r || dx < -c.r || dy > c.r || dy < -c.r) continue;
+        const a = (dx * c.cr + dy * c.sr) / c.rx, b = (-dx * c.sr + dy * c.cr) / c.ry;
+        if (a * a + b * b < 1) return true;
+      }
+      return false;
+    };
 
     const slice = document.createElement('canvas'), map = document.createElement('canvas');
     slice.width = slice.height = map.width = map.height = n;
@@ -875,34 +906,71 @@ footer {
     const imgM = cm.createImageData(n, n), dm = imgM.data;
     const lo = rgb(tokens.ctDark), hi = rgb(tokens.ctLight);
     const pal = tokens.seg.map(rgb);
-    const grey = [0.1, 0.36, 0.6, 0.93, 0.88, 0.2];
-    const fine = noise(rand, 48), coarse = noise(rand, 9);
-    const ids = new Uint8Array(n * n);
+    /* background, cartilage, calcified cartilage, plate, trabeculae, marrow */
+    const grey = [0.025, 0.06, 0.95, 0.9, 0.88, 0.14];
+    const fine = noise(rand, 60);
+    const ids = new Uint8Array(n * n), tv = new Float32Array(n * n);
     for (let y = 0; y < n; y++) {
+      const v = y / n, row = y * n;
       for (let x = 0; x < n; x++) {
-        const k = y * n + x, i = k * 4;
-        let id = y < ys[x] ? 0 : y < yc[x] ? 1 : y < yp[x] ? 2 : y < yb[x] ? 3 : 4;
-        if (id === 4 && mask[i] < 128) id = 5; else if (id === 3 && mask[i + 1] > 127) id = 5;
+        const k = row + x;
+        let id;
+        if (y < ys[x]) id = 0;
+        else if (y < yc[x]) id = 1;
+        else if (y < yp[x]) id = 2;
+        else if (y < yb[x]) id = inCanal(x, y) ? 5 : 3;
+        else id = boneAt(x, y) >= 0.5 ? 4 : 5;
         ids[k] = id;
-        const u = x / n, v = y / n;
-        let t = grey[id] + (fine(u, v) - 0.5) * (id >= 3 ? 0.16 : 0.07) + (coarse(u, v) - 0.5) * 0.08 + (rand() - 0.5) * 0.05;
-        if (id === 0) t += 0.05 * v;
-        t = t < 0 ? 0 : t > 1 ? 1 : t;
-        ds[i] = lo[0] + (hi[0] - lo[0]) * t; ds[i + 1] = lo[1] + (hi[1] - lo[1]) * t; ds[i + 2] = lo[2] + (hi[2] - lo[2]) * t; ds[i + 3] = 255;
-        const p = pal[id];
-        dm[i] = p[0]; dm[i + 1] = p[1]; dm[i + 2] = p[2]; dm[i + 3] = 255;
+        /* mineralised tissue is mottled; soft tissue and background only carry grain */
+        tv[k] = id >= 2 && id <= 4 ? grey[id] + (fine(x / n, v) - 0.5) * 0.12 + (rand() - 0.5) * 0.06 : grey[id] + (rand() - 0.5) * 0.11;
       }
+    }
+    /* lacunae, slice only: chondrocytes in the calcified cartilage (some in pairs), osteocytes in the bone */
+    const dent = (cx, cy, rx, ry, rot, amount) => {
+      const cr = Math.cos(rot), sr = Math.sin(rot), R = Math.ceil(Math.max(rx, ry)) + 1;
+      const y0 = Math.max(0, (cy - R) | 0), y1 = Math.min(n - 1, (cy + R) | 0), x0 = Math.max(0, (cx - R) | 0), x1 = Math.min(n - 1, (cx + R) | 0);
+      for (let y = y0; y <= y1; y++) {
+        for (let x = x0; x <= x1; x++) {
+          const dx = x + 0.5 - cx, dy = y + 0.5 - cy, a = (dx * cr + dy * sr) / rx, b = (-dx * sr + dy * cr) / ry, r2 = a * a + b * b;
+          if (r2 < 1) { const k = y * n + x; tv[k] += (grey[5] - tv[k]) * amount * (1 - r2 * r2); }
+        }
+      }
+    };
+    const at = (x, y) => (x < 0 || y < 0 || x >= n || y >= n ? -1 : ids[(y | 0) * n + (x | 0)]);
+    for (let placed = 0, tries = 0; placed < 70 && tries < 8000; tries++) {
+      const x = rand() * n, y = rand() * n;
+      if (at(x, y) !== 2 || at(x, y - 8 * um) !== 2 || at(x, y + 8 * um) !== 2) continue;
+      const rx = um * (4 + rand() * 1.6), ry = um * (3 + rand() * 1.4), rot = (rand() - 0.5) * 0.8;
+      dent(x, y, rx, ry, rot, 0.8);
+      if (rand() < 0.3) dent(x + 2.1 * rx * Math.cos(rot), y + 2.1 * rx * Math.sin(rot), rx * 0.9, ry * 0.9, rot, 0.8);
+      placed++;
+    }
+    for (let placed = 0, tries = 0; placed < 260 && tries < 20000; tries++) {
+      const x = rand() * n, y = rand() * n, id = at(x, y);
+      if (id !== 3 && id !== 4) continue;
+      dent(x, y, um * 4, um * 2, id === 3 ? (rand() - 0.5) * 0.5 : rand() * Math.PI, 0.85);
+      placed++;
+    }
+    /* CT edges are never as sharp as the map's */
+    blur1(tv, n, Math.max(1, Math.round(1.6 * um)));
+    const le = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+    const pack = (r, g, b) => (le ? ((255 << 24) | (b << 16) | (g << 8) | r) : ((r << 24) | (g << 16) | (b << 8) | 255)) >>> 0;
+    const lut = new Uint32Array(256);
+    for (let q = 0; q < 256; q++) {
+      const t = q / 255;
+      lut[q] = pack(Math.round(lo[0] + (hi[0] - lo[0]) * t), Math.round(lo[1] + (hi[1] - lo[1]) * t), Math.round(lo[2] + (hi[2] - lo[2]) * t));
+    }
+    const pal32 = pal.map((p) => pack(p[0], p[1], p[2]));
+    const s32 = new Uint32Array(ds.buffer, ds.byteOffset, n * n), m32 = new Uint32Array(dm.buffer, dm.byteOffset, n * n);
+    for (let k = 0; k < n * n; k++) {
+      let q = (tv[k] * 255 + 0.5) | 0;
+      q = q < 0 ? 0 : q > 255 ? 255 : q;
+      s32[k] = lut[q];
+      m32[k] = pal32[ids[k]];
     }
     cs.putImageData(imgS, 0, 0);
     cm.putImageData(imgM, 0, 0);
-    /* osteocyte lacunae in the bone, slice only */
-    cs.fillStyle = `rgba(${lo[0]},${lo[1]},${lo[2]},0.7)`;
-    for (let placed = 0, tries = 0; placed < 450 && tries < 20000; tries++) {
-      const x = (rand() * n) | 0, y = (rand() * n) | 0, id = ids[y * n + x];
-      if (id !== 3 && id !== 4) continue;
-      cs.beginPath(); cs.ellipse(x, y, n * 0.0025, n * 0.0016, rand() * Math.PI, 0, Math.PI * 2); cs.fill();
-      placed++;
-    }
+
     return { slice, map };
   }
 
@@ -914,8 +982,8 @@ footer {
       tick(t) { drawSection(t); }
     },
     joint: {
-      labels: ['MicroCT slice', 'Segmented tissues'], scale: { frac: 0.3, text: '500 µm' },
-      aria: 'Schematic cross-section of a joint about 1.7 millimetres wide. Left of the divider is a microCT slice in greys; right of the divider is the same slice segmented into cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. A scale bar marks 500 micrometres.',
+      labels: ['MicroCT slice', 'Segmented tissues'], scale: { frac: 0.144, text: '100 µm' },
+      aria: 'Schematic cross-section of a mouse joint about 0.7 millimetres wide. Left of the divider is a microCT slice in greys, where the cartilage barely shows against the background; right of the divider is the same slice segmented into cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. A scale bar marks 100 micrometres.',
       build(n) { const p = jointPanels(n); imgA = p.slice; imgB = p.map; },
       tick: null
     }
@@ -962,17 +1030,32 @@ footer {
     ctx.fillText(sc.text, bx, by - pad * 0.6);
   }
 
+  const cache = {};
+  function size() { return Math.round(canvas.clientWidth * Math.min(2, window.devicePixelRatio || 1)); }
+  function keyFor(n) { return n + '|' + tokens.secBg + '|' + tokens.bfLight + '|' + tokens.seg.join(','); }
+  function ensure(name, n, force) {
+    const key = keyFor(n), hit = cache[name];
+    if (!force && hit && hit.key === key) return hit;
+    const keepA = imgA, keepB = imgB;
+    scenes[name].build(n);
+    const built = cache[name] = { key, a: imgA, b: imgB };
+    imgA = keepA; imgB = keepB;
+    return built;
+  }
   function render(force) {
-    const css = canvas.clientWidth;
-    if (!css) return;
-    const n = Math.round(css * Math.min(2, window.devicePixelRatio || 1));
+    const n = size();
+    if (!n) return;
     readTokens();
-    const key = scene + '|' + n + '|' + tokens.secBg + '|' + tokens.bfLight + '|' + tokens.seg.join(',');
-    if (!force && key === built) { draw(); return; }
-    built = key;
-    canvas.width = canvas.height = n;
-    scenes[scene].build(n);
+    if (canvas.width !== n) canvas.width = canvas.height = n;
+    const c = ensure(scene, n, force);
+    imgA = c.a; imgB = c.b;
     draw();
+  }
+  function prebuild(name) {
+    const n = size();
+    if (!n || name === scene) return;
+    readTokens();
+    ensure(name, n, false);
   }
   const schedule = () => { clearTimeout(pending); pending = setTimeout(() => render(false), 120); };
 
@@ -989,10 +1072,13 @@ footer {
       b.tabIndex = on ? 0 : -1;
     });
     document.querySelectorAll('.fig figcaption[data-scene]').forEach((cap) => { cap.hidden = cap.dataset.scene !== name; });
-    render(true);
+    render(false);
     setAnimating(wantAnim());
   }
   tabs.forEach((b) => {
+    const ahead = () => prebuild(b.dataset.scene);
+    b.addEventListener('pointerenter', ahead);
+    b.addEventListener('focus', ahead);
     b.addEventListener('click', () => setScene(b.dataset.scene));
     b.addEventListener('keydown', (e) => {
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
