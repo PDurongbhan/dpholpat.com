@@ -78,6 +78,16 @@
   --seg-sbp: #3A3F9E;
   --seg-tb: #9598C9;
   --seg-marrow: #ECEDF4;
+  /* EEG: traces on paper; time-frequency power from pale through pink to violet */
+  --eeg-bg: #FBFBFD;
+  --eeg-trace: #1D1F45;
+  --eeg-grid: #E3E4EE;
+  --tf-0: #F4F5F9;
+  --tf-1: #ECCFDA;
+  --tf-2: #CFC3DB;
+  --tf-3: #9598C9;
+  --tf-4: #3A3F9E;
+  --tf-5: #1D1F45;
   /* Type */
   --font-display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-text: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
@@ -109,6 +119,15 @@
     --seg-sbp: #9EA3FF;
     --seg-tb: #4F5490;
     --seg-marrow: #121429;
+    --eeg-bg: #0E1022;
+    --eeg-trace: #D9DBF0;
+    --eeg-grid: #1E2140;
+    --tf-0: #0B0C1A;
+    --tf-1: #261E3E;
+    --tf-2: #4E2E5A;
+    --tf-3: #7062B0;
+    --tf-4: #9EA3FF;
+    --tf-5: #E7E8F4;
     color-scheme: dark;
   }
 }
@@ -136,6 +155,15 @@
   --seg-sbp: #9EA3FF;
   --seg-tb: #4F5490;
   --seg-marrow: #121429;
+  --eeg-bg: #0E1022;
+  --eeg-trace: #D9DBF0;
+  --eeg-grid: #1E2140;
+  --tf-0: #0B0C1A;
+  --tf-1: #261E3E;
+  --tf-2: #4E2E5A;
+  --tf-3: #7062B0;
+  --tf-4: #9EA3FF;
+  --tf-5: #E7E8F4;
   color-scheme: dark;
 }
 
@@ -370,18 +398,20 @@ footer {
   </div>
 
   <figure class="fig">
-    <div class="fig-tabs" role="tablist" aria-label="Two examples">
+    <div class="fig-tabs" role="tablist" aria-label="Three examples">
       <button type="button" role="tab" id="tab-aggregate" aria-selected="true" aria-controls="aggregate" data-scene="aggregate">Cell aggregate</button>
       <button type="button" role="tab" id="tab-joint" aria-selected="false" aria-controls="aggregate" data-scene="joint" tabindex="-1">Joint</button>
+      <button type="button" role="tab" id="tab-eeg" aria-selected="false" aria-controls="aggregate" data-scene="eeg" tabindex="-1">EEG</button>
     </div>
     <div class="fig-labels" aria-hidden="true"><span id="fig-label-l">Routine image</span><span id="fig-label-r">Gold standard</span></div>
     <div class="fig-frame">
       <canvas id="aggregate" width="600" height="600" role="img" aria-label="Schematic of a cell aggregate about 500 micrometres across. Left of the divider is a routine brightfield image; right of the divider is the stained section it stands in for. A scale bar marks 100 micrometres."></canvas>
     </div>
-    <label class="sr-only" for="split">Divider between routine image and gold standard</label>
+    <label class="sr-only" for="split">Divider between the two views</label>
     <input type="range" id="split" min="0" max="100" value="50">
     <figcaption data-scene="aggregate"><b>Fig. 1.</b> A cell aggregate about 500&nbsp;µm across, drawn as a routine brightfield image (left) and as the stained section it stands in for (right). My pipelines aim to read the right from the left without cutting anything. Drag the divider to compare. Schematic, not data.</figcaption>
     <figcaption data-scene="joint" hidden><b>Fig. 1.</b> A mouse joint cross-section about 0.7&nbsp;mm wide, drawn as a microCT slice (left) and as the tissue map a segmentation pipeline reads from it (right): cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. The map is where the numbers come from: cartilage and plate thickness, trabecular separation. Drag the divider to compare. Schematic, not data.</figcaption>
+    <figcaption data-scene="eeg" hidden><b>Fig. 1.</b> Eight channels of resting EEG over four seconds, drawn as raw traces (left) and as the time-frequency map each channel becomes (right), from 1&nbsp;Hz at the bottom of each strip to 30&nbsp;Hz at the top. Alpha near 10&nbsp;Hz is strongest at the back of the head; blinks are the slow bursts at the front. My dementia classifiers read their features from maps like these. Drag the divider to compare. Schematic, not data.</figcaption>
   </figure>
 </header>
 
@@ -648,8 +678,9 @@ footer {
 })();
 
 (() => {
-  /* Fig. 1: two schematic pairs behind one divider. The cell aggregate: brightfield on the left, stained section
-     on the right. The joint: a microCT slice on the left, the segmented tissue map on the right. */
+  /* Fig. 1: three schematic pairs behind one divider. The cell aggregate: brightfield on the left, stained section
+     on the right. The joint: a microCT slice on the left, the segmented tissue map on the right. The EEG: raw traces
+     on the left, a time-frequency strip per channel on the right. */
   const root = document.documentElement;
   const canvas = document.getElementById('aggregate');
   const slider = document.getElementById('split');
@@ -700,6 +731,8 @@ footer {
       secNuc: get('--sec-nuc'), secEdge: get('--sec-edge'), mode: get('--sec-mode'),
       ctDark: get('--ct-dark'), ctLight: get('--ct-light'),
       seg: [get('--seg-bg'), get('--seg-cart'), get('--seg-cc'), get('--seg-sbp'), get('--seg-tb'), get('--seg-marrow')],
+      eegBg: get('--eeg-bg'), eegTrace: get('--eeg-trace'), eegGrid: get('--eeg-grid'),
+      tf: [0, 1, 2, 3, 4, 5].map((i) => get('--tf-' + i)),
       ink: get('--ink'), handle: get('--fig-handle'), scaleBg: get('--scale-bg')
     };
   }
@@ -974,6 +1007,168 @@ footer {
     return { slice, map };
   }
 
+  /* ---------- Scene 3: EEG ---------- */
+  /* Eight channels of resting EEG on a six-second loop that scrolls slowly. The traces and the time-frequency map
+     are built from the same components (alpha, theta, beta, blinks, 1/f noise), so they agree across the divider. */
+  const CH = ['Fp1', 'Fp2', 'F3', 'F4', 'C3', 'C4', 'O1', 'O2'];
+  const MIX = {
+    alpha: [0.12, 0.12, 0.3, 0.3, 0.5, 0.5, 1.0, 1.0],
+    theta: [0.2, 0.2, 0.32, 0.32, 0.22, 0.22, 0.12, 0.12],
+    beta: [0.1, 0.1, 0.16, 0.16, 0.2, 0.2, 0.08, 0.08],
+    blink: [1.0, 1.0, 0.35, 0.35, 0.08, 0.08, 0, 0],
+    noise: [0.25, 0.25, 0.22, 0.22, 0.22, 0.22, 0.2, 0.2]
+  };
+  const eeg = { n: 0, off: 0, last: -1 };
+  const eegLayout = (n) => ({ m0: 0.03 * n, rowH: 0.102 * n, gap: 0.014 * n });
+  function packer() {
+    const le = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+    return (r, g, b) => (le ? ((255 << 24) | (b << 16) | (g << 8) | r) : ((r << 24) | (g << 16) | (b << 8) | 255)) >>> 0;
+  }
+  function eegBuild(n) {
+    const rand = rng(31), TAU = Math.PI * 2, LOOP = 6;
+    const Pp = Math.round(1.5 * n), pps = Pp / LOOP;
+    const { m0, rowH, gap } = eegLayout(n);
+    const near = (t, c, s) => { let d = Math.abs(t - c); d = Math.min(d, LOOP - d); return Math.exp(-(d * d) / (2 * s * s)); };
+    const bursts = (t, list, base) => { let v = base; for (const [c, s, a] of list) v += a * near(t, c, s); return v; };
+    /* alpha comes in waxing and waning bursts; theta in a couple of frontal runs */
+    const alphaB = [[0.8, 0.38, 1.0], [2.3, 0.32, 0.75], [3.75, 0.42, 1.0], [5.25, 0.3, 0.7]];
+    const thetaB = [[1.6, 0.35, 1.0], [4.5, 0.4, 0.85]];
+    const blinkT = [1.35, 4.65];
+    const A = new Float32Array(Pp), Th = new Float32Array(Pp), Be = new Float32Array(Pp), Bl = new Float32Array(Pp), Bs = new Float32Array(Pp);
+    for (let x = 0; x < Pp; x++) {
+      const t = x / pps;
+      A[x] = bursts(t, alphaB, 0.12);
+      Th[x] = bursts(t, thetaB, 0.1);
+      Be[x] = 0.6 + 0.4 * Math.sin((TAU * t) / 3 + 0.8);
+      Bl[x] = near(t, blinkT[0], 0.09) + near(t, blinkT[1], 0.09);
+      Bs[x] = near(t, blinkT[0], 0.22) + near(t, blinkT[1], 0.22);
+    }
+    /* traces: every component repeats a whole number of times in the loop, so it scrolls without a seam */
+    eeg.sig = CH.map((_, c) => {
+      const s = new Float32Array(Pp), pa = rand() * TAU, pt = rand() * TAU, pb = rand() * TAU, w1 = rand() * TAU, w2 = rand() * TAU, comps = [];
+      for (let i = 0; i < 48; i++) { const f = (1 + Math.floor(rand() * 179)) / LOOP; comps.push(f, rand() * TAU, 1 / Math.sqrt(f)); }
+      for (let x = 0; x < Pp; x++) {
+        const t = x / pps;
+        let pink = 0;
+        for (let i = 0; i < comps.length; i += 3) pink += comps[i + 2] * Math.sin(TAU * comps[i] * t + comps[i + 1]);
+        const wob = 0.9 * Math.sin((TAU * 2 * t) / LOOP + w1) + 0.5 * Math.sin((TAU * 5 * t) / LOOP + w2);
+        s[x] = MIX.alpha[c] * A[x] * Math.sin(TAU * 10 * t + pa + wob) + MIX.theta[c] * Th[x] * Math.sin(TAU * 6 * t + pt + 0.6 * wob)
+          + MIX.beta[c] * Be[x] * Math.sin(TAU * 20 * t + pb) + MIX.blink[c] * 1.6 * Bl[x]
+          + MIX.noise[c] * 0.25 * pink + (rand() - 0.5) * 0.06;
+      }
+      return s;
+    });
+
+    /* time-frequency map: one strip per channel, 1 Hz at the bottom to 30 Hz at the top, log power */
+    const Wd = Pp + n + 2, tf = document.createElement('canvas');
+    tf.width = Wd; tf.height = n;
+    const tc = tf.getContext('2d'), img = tc.createImageData(Wd, n), d32 = new Uint32Array(img.data.buffer);
+    const pack = packer(), ramp = tokens.tf.map(rgb), lut = new Uint32Array(256);
+    for (let q = 0; q < 256; q++) {
+      const u = (q / 255) * (ramp.length - 1), i = Math.min(ramp.length - 2, Math.floor(u)), f = u - i, a0 = ramp[i], a1 = ramp[i + 1];
+      lut[q] = pack(Math.round(a0[0] + (a1[0] - a0[0]) * f), Math.round(a0[1] + (a1[1] - a0[1]) * f), Math.round(a0[2] + (a1[2] - a0[2]) * f));
+    }
+    const bgc = rgb(tokens.eegBg), gridc = rgb(tokens.eegGrid);
+    d32.fill(pack(bgc[0], bgc[1], bgc[2]));
+    /* speckle: smooth noise on log power, periodic along time */
+    const gx = 60, gy = 90, sg = new Float32Array(gx * (gy + 1));
+    for (let i = 0; i < sg.length; i++) sg[i] = (rand() - 0.5) * 0.4;
+    const speck = (u, v) => {
+      const x = u * gx, y = v * gy, xi = Math.floor(x), yi = Math.min(gy - 1, Math.floor(y)), fx = x - xi, fy = y - yi;
+      const x0 = xi % gx, x1 = (x0 + 1) % gx, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+      const a = sg[yi * gx + x0], b = sg[yi * gx + x1], c = sg[(yi + 1) * gx + x0], d = sg[(yi + 1) * gx + x1];
+      return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+    };
+    const g = (f, m, s) => Math.exp(-((f - m) * (f - m)) / (2 * s * s));
+    const vmin = -2.7, vmax = 0.25, scale = 255 / (vmax - vmin), gridPx = pack(gridc[0], gridc[1], gridc[2]);
+    for (let c = 0; c < CH.length; c++) {
+      const y0 = Math.round(m0 + c * rowH + gap / 2), y1 = Math.round(m0 + (c + 1) * rowH - gap / 2), hS = y1 - y0;
+      const ka = MIX.alpha[c] ** 2, kt = MIX.theta[c] ** 2, kb = MIX.beta[c] ** 2, kk = (MIX.blink[c] * 1.6) ** 2, kn = MIX.noise[c] ** 2;
+      for (let yy = 0; yy < hS; yy++) {
+        const f = 1 + 29 * (1 - (yy + 0.5) / hS);
+        const sa = ka * g(f, 10, 1.5), st = kt * g(f, 6, 1.3), sb = kb * g(f, 20, 3), sk = kk * g(f, 1, 1.8), sn = (kn * 0.2) / f + 0.0003;
+        const row = (y0 + yy) * Wd, v = (y0 + yy) / n;
+        for (let x = 0; x < Wd; x++) {
+          const xi = x % Pp;
+          const p = sa * A[xi] * A[xi] + st * Th[xi] * Th[xi] + sb * Be[xi] * Be[xi] + sk * Bs[xi] * Bs[xi] + sn;
+          let q = ((Math.log10(p) + speck(xi / Pp, v) - vmin) * scale) | 0;
+          q = q < 0 ? 0 : q > 255 ? 255 : q;
+          d32[row + x] = lut[q];
+        }
+      }
+      d32.fill(gridPx, (y0 - 1) * Wd, y0 * Wd);
+      d32.fill(gridPx, y1 * Wd, (y1 + 1) * Wd);
+    }
+    tc.putImageData(img, 0, 0);
+
+    eeg.n = n; eeg.Pp = Pp; eeg.pps = pps; eeg.tf = tf; eeg.off = 0; eeg.last = -1;
+    eeg.a = document.createElement('canvas');
+    eeg.b = document.createElement('canvas');
+    eeg.a.width = eeg.a.height = eeg.b.width = eeg.b.height = n;
+    eegDraw();
+  }
+  function eegLabels(cx, n) {
+    const { m0, rowH, gap } = eegLayout(n), fs = Math.max(10, Math.round(n * 0.026)), pad = n * 0.006;
+    cx.font = `600 ${fs}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    cx.textAlign = 'left';
+    cx.textBaseline = 'alphabetic';
+    for (let c = 0; c < CH.length; c++) {
+      const x = n * 0.016, y = m0 + c * rowH + gap / 2 + pad + fs * 0.75, w = cx.measureText(CH[c]).width;
+      cx.fillStyle = tokens.scaleBg;
+      cx.beginPath();
+      if (cx.roundRect) cx.roundRect(x - pad, y - fs * 0.75 - pad * 0.7, w + pad * 2, fs * 0.75 + pad * 1.6, n * 0.006);
+      else cx.rect(x - pad, y - fs * 0.75 - pad * 0.7, w + pad * 2, fs * 0.75 + pad * 1.6);
+      cx.fill();
+      cx.fillStyle = tokens.ink;
+      cx.fillText(CH[c], x, y);
+    }
+  }
+  function eegLegend(cx, n) {
+    const x0 = n * 0.66, x1 = n * 0.94, y = n * 0.912, h = Math.max(4, Math.round(n * 0.014)), fs = Math.max(10, Math.round(n * 0.03));
+    const grad = cx.createLinearGradient(x0, 0, x1, 0);
+    tokens.tf.forEach((col, i) => grad.addColorStop(i / (tokens.tf.length - 1), col));
+    cx.fillStyle = grad;
+    cx.fillRect(x0, y, x1 - x0, h);
+    cx.strokeStyle = tokens.eegGrid;
+    cx.lineWidth = 1;
+    cx.strokeRect(x0 + 0.5, y + 0.5, x1 - x0 - 1, h - 1);
+    cx.font = `600 ${fs}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    cx.fillStyle = tokens.ink;
+    cx.textAlign = 'left';
+    cx.textBaseline = 'alphabetic';
+    cx.fillText('Power', x0, y - n * 0.012);
+  }
+  function eegDraw() {
+    const n = eeg.n, { m0, rowH } = eegLayout(n), a = eeg.a.getContext('2d'), b = eeg.b.getContext('2d');
+    const off = eeg.off, i0 = Math.floor(off), fr = off - i0, Pp = eeg.Pp, k = 0.03 * n;
+    a.fillStyle = tokens.eegBg;
+    a.fillRect(0, 0, n, n);
+    a.strokeStyle = tokens.eegGrid;
+    a.lineWidth = Math.max(1, Math.round(n * 0.0012));
+    a.beginPath();
+    for (let gxp = Math.ceil(off / eeg.pps) * eeg.pps - off; gxp < n; gxp += eeg.pps) { a.moveTo(gxp, m0); a.lineTo(gxp, m0 + CH.length * rowH); }
+    a.stroke();
+    a.strokeStyle = tokens.eegTrace;
+    a.lineWidth = Math.max(1, n * 0.002);
+    a.lineJoin = 'round';
+    for (let c = 0; c < CH.length; c++) {
+      const s = eeg.sig[c], base = m0 + (c + 0.5) * rowH;
+      a.beginPath();
+      a.moveTo(-fr, base - k * s[i0 % Pp]);
+      for (let x = 1; x <= n + 1; x++) a.lineTo(x - fr, base - k * s[(i0 + x) % Pp]);
+      a.stroke();
+    }
+    eegLabels(a, n);
+    b.drawImage(eeg.tf, off, 0, n, n, 0, 0, n, n);
+    eegLegend(b, n);
+    eegLabels(b, n);
+  }
+  function eegTick(t) {
+    if (eeg.last >= 0) eeg.off = (eeg.off + Math.min(0.1, t - eeg.last) * 0.2 * eeg.pps) % eeg.Pp;
+    eeg.last = t;
+    eegDraw();
+  }
+
   const scenes = {
     aggregate: {
       labels: ['Routine image', 'Gold standard'], scale: { frac: 0.144, text: '100 µm' },
@@ -986,6 +1181,13 @@ footer {
       aria: 'Schematic cross-section of a mouse joint about 0.7 millimetres wide. Left of the divider is a microCT slice in greys, where the cartilage barely shows against the background; right of the divider is the same slice segmented into cartilage, calcified cartilage, subchondral bone plate, trabecular bone and marrow. A scale bar marks 100 micrometres.',
       build(n) { const p = jointPanels(n); imgA = p.slice; imgB = p.map; },
       tick: null
+    },
+    eeg: {
+      labels: ['Raw EEG', 'Time-frequency map'], scale: { frac: 0.25, text: '1 s' },
+      aria: 'Schematic of eight channels of resting EEG over four seconds, scrolling slowly. Left of the divider are the raw traces; right of the divider each channel is drawn as a time-frequency strip from 1 to 30 hertz, with the alpha rhythm near 10 hertz strongest at the back of the head and blinks as slow bursts at the front. A scale bar marks one second.',
+      build(n) { eegBuild(n); imgA = eeg.a; imgB = eeg.b; this.scale.frac = eeg.pps / n; },
+      tick(t) { eegTick(t); },
+      refresh() { if (eeg.n) eegDraw(); }
     }
   };
 
@@ -1032,7 +1234,7 @@ footer {
 
   const cache = {};
   function size() { return Math.round(canvas.clientWidth * Math.min(2, window.devicePixelRatio || 1)); }
-  function keyFor(n) { return n + '|' + tokens.secBg + '|' + tokens.bfLight + '|' + tokens.seg.join(','); }
+  function keyFor(n) { return n + '|' + tokens.secBg + '|' + tokens.bfLight + '|' + tokens.seg.join(',') + '|' + tokens.eegBg + '|' + tokens.tf.join(','); }
   function ensure(name, n, force) {
     const key = keyFor(n), hit = cache[name];
     if (!force && hit && hit.key === key) return hit;
@@ -1049,6 +1251,7 @@ footer {
     if (canvas.width !== n) canvas.width = canvas.height = n;
     const c = ensure(scene, n, force);
     imgA = c.a; imgB = c.b;
+    if (scenes[scene].refresh) scenes[scene].refresh();
     draw();
   }
   function prebuild(name) {
@@ -1109,7 +1312,7 @@ footer {
 
   slider.value = String(Math.round(split * 100));
   render(true);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (scenes[scene].refresh) scenes[scene].refresh(); draw(); });
 
   /* The nuclei drift while the figure is on screen; not under reduced motion */
   let animating = false, raf = 0, onScreen = true, lastFrame = 0;
